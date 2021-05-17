@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "typeRoots": ["./node_modules/@types", "./@types"],
+    "outDir": "build",
+    "rootDir": "src",
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": true
+  },
+  "include": ["./src"],
+  "exclude": ["./node_modules/*", "./build/*"]
+}
