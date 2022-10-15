@@ -25,7 +25,7 @@ cron.schedule('*/10 * * * *', async () => {
     await foppomppu_computer()
     await foppomppu_digital()
     await ruriweb_digital()
-    await quasar_digital()
+    //await quasar_digital()
     await coolnjoy_digital()
     await deal_digital()
     await fodeal_digital()
@@ -50,10 +50,11 @@ t.on('tweet', tweet => {
 
 async function ppomppu_computer() {
     console.log('컴퓨터')
-    const html = await axios.get('http://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&category=4', { responseType: 'arraybuffer' })
+    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&category=4', { responseType: 'arraybuffer' })
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'EUC-KR').toString())
     let list = []
-    $('tr[class^="list"]').each((i, elem) => list.push(elem) )
+    $('tr[class^="list1"],tr[class^="list0"]').each((i, elem) => list.push(elem)) //; list.push(elem)
+
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
         const id = parseInt($(element.find('td.eng.list_vspace')[0]).text().trim()) || 0
@@ -62,10 +63,9 @@ async function ppomppu_computer() {
         const url = element.find('table > tbody > tr > td > a').attr('href')
         const thumbnail = element.find('table > tbody > tr > td > a > img').attr('src')
         let date = ''
-        if(element.find('td:nth-child(5)').attr('title') != undefined){
-            date = element.find('td:nth-child(5)').attr('title').replace(/\./gi, '/')
+        if(element.find('td:nth-child(4)').attr('title') != undefined){
+            date = element.find('td:nth-child(4)').attr('title').replace(/\./gi, '/')
         }
-
         if (name && data.ppomppu_computer != 0 && data.ppomppu_computer < id) {
             const embed = new Discord.MessageEmbed()
                 .setColor('#00ff00')
@@ -85,10 +85,11 @@ async function ppomppu_computer() {
 
 async function ppomppu_digital() {
     console.log('디지털')
-    const html = await axios.get('http://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&category=5', { responseType: 'arraybuffer' })
+    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&category=5', { responseType: 'arraybuffer' })
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'EUC-KR').toString())
     let list = []
-    $('tr[class^="list"]').each((i, elem) => list.push(elem) )
+    $('tr[class^="list1"],tr[class^="list0"]').each((i, elem) => list.push(elem) ) //; list.push(elem)
+
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
         const id = parseInt($(element.find('td.eng.list_vspace')[0]).text().trim()) || 0
@@ -96,9 +97,9 @@ async function ppomppu_digital() {
         const name = element.find('font.list_title').text().trim()
         const url = element.find('table > tbody > tr > td > a').attr('href')
         const thumbnail = element.find('table > tbody > tr > td > a > img').attr('src')
-        let date = '';
-        if(element.find('td:nth-child(5)').attr('title') != undefined){
-            date = element.find('td:nth-child(5)').attr('title').replace(/\./gi, '/')
+        let date = ''
+        if(element.find('td:nth-child(4)').attr('title') != undefined){
+            date = element.find('td:nth-child(4)').attr('title').replace(/\./gi, '/')
         }
         if (name && data.ppomppu_digital != 0 && data.ppomppu_digital < id) {
             const embed = new Discord.MessageEmbed()
@@ -116,12 +117,14 @@ async function ppomppu_digital() {
         }
     })
 }
+
 async function foppomppu_computer() {
     console.log('fo컴퓨터')
-    const html = await axios.get('http://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4&category=3', { responseType: 'arraybuffer' })
+    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4&category=3', { responseType: 'arraybuffer' })
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'EUC-KR').toString())
     let list = []
-    $('tr[class^="list"]').each((i, elem) => list.push(elem) )
+    $('tr[class^="list1"],tr[class^="list0"]').each((i, elem) => list.push(elem) ) //; list.push(elem)
+
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
         const id = parseInt($(element.find('td.eng.list_vspace')[0]).text().trim()) || 0
@@ -129,11 +132,10 @@ async function foppomppu_computer() {
         const name = element.find('font.list_title').text().trim()
         const url = element.find('table > tbody > tr > td > a').attr('href')
         const thumbnail = element.find('table > tbody > tr > td > a > img').attr('src')
-        let date = '';
-        if(element.find('td:nth-child(5)').attr('title') != undefined){
-            date = element.find('td:nth-child(5)').attr('title').replace(/\./gi, '/')
+        let date = ''
+        if(element.find('td:nth-child(4)').attr('title') != undefined){
+            date = element.find('td:nth-child(4)').attr('title').replace(/\./gi, '/')
         }
-
         if (name && data.foppomppu_computer != 0 && data.foppomppu_computer < id) {
             const embed = new Discord.MessageEmbed()
                 .setColor('#00ff00')
@@ -153,10 +155,11 @@ async function foppomppu_computer() {
 
 async function foppomppu_digital() {
     console.log('fo디지털')
-    const html = await axios.get('http://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4&category=4', { responseType: 'arraybuffer' })
+    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4&category=4', { responseType: 'arraybuffer' })
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'EUC-KR').toString())
     let list = []
-    $('tr[class^="list"]').each((i, elem) => list.push(elem) )
+    $('tr[class^="list1"],tr[class^="list0"]').each((i, elem) => list.push(elem) ) //; list.push(elem)
+
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
         const id = parseInt($(element.find('td.eng.list_vspace')[0]).text().trim()) || 0
@@ -164,9 +167,9 @@ async function foppomppu_digital() {
         const name = element.find('font.list_title').text().trim()
         const url = element.find('table > tbody > tr > td > a').attr('href')
         const thumbnail = element.find('table > tbody > tr > td > a > img').attr('src')
-        let date = '';
-        if(element.find('td:nth-child(5)').attr('title') != undefined){
-            date = element.find('td:nth-child(5)').attr('title').replace(/\./gi, '/')
+        let date = ''
+        if(element.find('td:nth-child(4)').attr('title') != undefined){
+            date = element.find('td:nth-child(4)').attr('title').replace(/\./gi, '/')
         }
         if (name && data.foppomppu_digital != 0 && data.foppomppu_digital < id) {
             const embed = new Discord.MessageEmbed()
@@ -217,12 +220,15 @@ async function ruriweb_digital() {
         }
     })
 }
+
 async function quasar_digital() {
     console.log('퀘이사존')
-    const html = await axios.get('https://quasarzone.com/bbs/qb_saleinfo?_method=post&type=&page=1&direction=DESC', {responseType: 'arraybuffer'})
+    const html = await axios.get('https://quasarzone.com/bbs/qb_saleinfo', {responseType: 'arraybuffer'})
+    console.log(html)
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'UTF-8').toString())
     let list = []
-    $('tr > td > div[class^="market-info-list"]').each((i, elem) => list.push(elem))
+    console.log($)
+    $('div[class^="market-type-list market-info-type-list relative"] > table > tbody > tr').each((i, elem) => list.push(elem))
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
         const id = parseInt(element.find('div.thumb-wrap > a').attr('href').substring(0, element.find('div.thumb-wrap > a').attr('href').indexOf("?")).replace("/bbs/qb_saleinfo/views/", "").trim()) || 0
@@ -259,6 +265,7 @@ async function quasar_digital() {
         }
     })
 }
+
 async function coolnjoy_digital() {
     console.log('쿨앤조이')
     const html = await axios.get('https://coolenjoy.net/bbs/jirum', {responseType: 'arraybuffer'})
@@ -312,14 +319,16 @@ async function deal_digital() {
             const id = parseInt(element.find('td.td_num').text()) || 0
             const thumbnail = element.find('td.td_img > a > img').attr('src')
             const name = $(element.find('td.td_subject > a')[0]).text().substring(0, $(element.find('td.td_subject > a')[0]).text().indexOf("댓글")).trim()
-            const url = element.find('td.td_subject > a').attr('href')
+            let url = element.find('td.td_subject > a').attr('href')
             let date = ''
             if (element.find('td.td_date').text().trim().indexOf(":") >= 0) {
                 date = today()
             } else {
                 date = ''+yyyy+'/'+element.find('td.td_date').text().trim().replace(/\-/gi, '/')
             }
-
+            if (url.indexOf("http") < 0 ) {
+                url = 'http:'+url
+            }
             if (arrtt.indexOf(type) >= 0 && name && data.deal_digital != 0 && data.deal_digital < id) {
                 const embed = new Discord.MessageEmbed()
                     .setColor('#00ff00')
@@ -355,12 +364,15 @@ async function fodeal_digital() {
             const id = parseInt(element.find('td.td_num').text()) || 0
             const thumbnail = element.find('td.td_img > a > img').attr('src')
             const name = $(element.find('td.td_subject > a')[0]).text().substring(0, $(element.find('td.td_subject > a')[0]).text().indexOf("댓글")).trim()
-            const url = element.find('td.td_subject > a').attr('href')
+            let url = element.find('td.td_subject > a').attr('href')
             let date = ''
             if (element.find('td.td_date').text().trim().indexOf(":") >= 0) {
                 date = today()
             } else {
                 date = ''+yyyy+'/'+element.find('td.td_date').text().trim().replace(/\-/gi, '/')
+            }
+            if (url.indexOf("http") < 0 ) {
+                url = 'http:'+url
             }
             if (arrtt.indexOf(type) >= 0 && name && data.fodeal_digital != 0 && data.fodeal_digital < id) {
                 const embed = new Discord.MessageEmbed()
