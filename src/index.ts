@@ -25,7 +25,7 @@ cron.schedule('*/10 * * * *', async () => {
     await foppomppu_computer()
     await foppomppu_digital()
     await ruriweb_digital()
-    //await quasar_digital()
+    await quasar_digital()
     await coolnjoy_digital()
     await deal_digital()
     await fodeal_digital()
@@ -223,7 +223,7 @@ async function ruriweb_digital() {
 
 async function quasar_digital() {
     console.log('퀘이사존')
-    const html = await axios.get('https://quasarzone.com/bbs/qb_saleinfo', {responseType: 'arraybuffer'})
+    const html = await axios.get('https://quasarzone.com/bbs/qb_saleinfo?_method=post&type&page=1&_token=GVSUCeQILtnnNS9pigMNpYcr4JCu7PiMl5Kyy6Kh&category&popularity&kind=subject&keyword&sort=num%2C+reply&direction=DESC', {responseType: 'arraybuffer'})
     console.log(html)
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'UTF-8').toString())
     let list = []
