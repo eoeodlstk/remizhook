@@ -4,20 +4,21 @@ import cheerio from 'cheerio'
 import axios from 'axios'
 import iconv from 'iconv-lite'
 import cron from 'node-cron'
-import Twitter from 'node-tweet-stream'
+//import Twitter from 'node-tweet-stream'
 import dateFormat from 'dateformat'
 import { data, saveData, loadData } from './data'
 
 dotenv.config()
 loadData()
 const client = new Discord.WebhookClient(process.env.DISCORDBOT, process.env.DISCORDTOKEN)
+/*
 const t = new Twitter({
     consumer_key: process.env.CONSUMER_KEY,
     consumer_secret: process.env.CONSUMER_SECRET,
     token: process.env.TOKEN ,
     token_secret: process.env.TOKEN_SECRET
 })
-
+*/
 // cron.schedule('*/20 7-23,0-3 * * *', async () => {
 cron.schedule('*/10 * * * *', async () => {
     await ppomppu_computer()
@@ -31,7 +32,7 @@ cron.schedule('*/10 * * * *', async () => {
     await fodeal_digital()
     saveData()
 })
-
+/*
 t.follow('2596141345')
 
 t.on('tweet', tweet => {
@@ -47,7 +48,7 @@ t.on('tweet', tweet => {
         embed.setImage(tweet.entities.media[0].media_url)
     client.send(embed)
 })
-
+*/
 async function ppomppu_computer() {
     console.log('컴퓨터')
     const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&category=4', { responseType: 'arraybuffer' })
@@ -224,10 +225,8 @@ async function ruriweb_digital() {
 async function quasar_digital() {
     console.log('퀘이사존')
     const html = await axios.get('https://quasarzone.com/bbs/qb_saleinfo?_method=post&type&page=1&_token=GVSUCeQILtnnNS9pigMNpYcr4JCu7PiMl5Kyy6Kh&category&popularity&kind=subject&keyword&sort=num%2C+reply&direction=DESC', {responseType: 'arraybuffer'})
-    console.log(html)
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'UTF-8').toString())
     let list = []
-    console.log($)
     $('div[class^="market-type-list market-info-type-list relative"] > table > tbody > tr').each((i, elem) => list.push(elem))
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
