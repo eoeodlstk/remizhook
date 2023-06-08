@@ -191,7 +191,7 @@ async function foppomppu_digital() {
 
 async function ruriweb_digital() {
     console.log('루리')
-    const html = await axios.get('https://bbs.ruliweb.com/market/board/1020?cate=11', {responseType: 'arraybuffer'})
+    const html = await axios.get('https://bbs.ruliweb.com/market/board/1020', {responseType: 'arraybuffer'})
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'UTF-8').toString())
     let list = []
     $('tr[class^="table_body"]').each((i, elem) => list.push(elem))
@@ -199,13 +199,14 @@ async function ruriweb_digital() {
         const element = $(elem)
         const id = parseInt($(element.find('td.id')[0]).text().trim()) || 0
         const type = $(element.find('td.divsn.text_over > a')[0]).text().trim()
+        const arrtt = ['게임H/W','게임S/W', 'PC/가전', 'A/V', 'VR'];
         const name = element.find('td.subject > div > a.deco').text().trim()
         const url = element.find('td.subject > div > a.deco').attr('href')
         let date = ''
         if (element.find('td.time').text().trim().length < 6) {
             date = today()
         } else date = element.find('td.time').text().trim().replace(/\./gi, '/')
-        if (url != undefined && name && data.ruri_digital != 0 && data.ruri_digital < id) {
+        if (arrtt.indexOf(type) >= 0 && url != undefined && name && data.ruri_digital != 0 && data.ruri_digital < id) {
             const embed = new Discord.MessageEmbed()
                 .setColor('#00ff00')
                 .setAuthor('루리웹', 'https://img.ruliweb.com/img/2016/icon/ruliweb_icon_144_144.png', 'https://www.ruliweb.com/')
