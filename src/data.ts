@@ -2,7 +2,6 @@ import * as fs from 'fs'
 
 class Data {
     ppomppu_computer: number = 0
-    ppomppu_digital: number = 0
     foppomppu_computer: number = 0
     foppomppu_digital: number = 0
     quasa_digital : number = 0

@@ -22,7 +22,6 @@ const t = new Twitter({
 // cron.schedule('*/20 7-23,0-3 * * *', async () => {
 cron.schedule('*/10 * * * *', async () => {
     await ppomppu_computer()
-    await ppomppu_digital()
     await foppomppu_computer()
     await foppomppu_digital()
     await ruriweb_digital()
@@ -50,24 +49,26 @@ t.on('tweet', tweet => {
 })
 */
 async function ppomppu_computer() {
-    console.log('컴퓨터')
-    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&category=4', { responseType: 'arraybuffer' })
+    console.log('국내뽐뿌')
+    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu', { responseType: 'arraybuffer' })
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'EUC-KR').toString())
     let list = []
-    $('tr[class^="list1"],tr[class^="list0"]').each((i, elem) => list.push(elem)) //; list.push(elem)
+    $('tr[class^="common-list1"],tr[class^="common-list0"]').each((i, elem) => list.push(elem)) //; list.push(elem)
 
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
         const id = parseInt($(element.find('td.eng.list_vspace')[0]).text().trim()) || 0
-        const type = $(element.find('nobr')[0]).text().trim()
-        const name = element.find('font.list_title').text().trim()
+        //const type = $(element.find('nobr')[0]).text().trim()
+        const type = element.find('td:nth-child(3)').find('table > tbody > tr > td:nth-child(2)').find("span:last").text().trim();
+        const name = element.find('font.list_title').text().trim();
+        const arrtt = ['[컴퓨터]','[디지털]', '[가전/가구]'];
         const url = element.find('table > tbody > tr > td > a').attr('href')
         const thumbnail = element.find('table > tbody > tr > td > a > img').attr('src')
         let date = ''
         if(element.find('td:nth-child(4)').attr('title') != undefined){
             date = element.find('td:nth-child(4)').attr('title').replace(/\./gi, '/')
         }
-        if (name && data.ppomppu_computer != 0 && data.ppomppu_computer < id) {
+        if (arrtt.indexOf(type) >= 0 && name && data.ppomppu_computer != 0 && data.ppomppu_computer < id) {
             const embed = new Discord.MessageEmbed()
                 .setColor('#00ff00')
                 .setAuthor('뽐뿌', 'http://www.ppomppu.co.kr/favicon.ico', 'http://www.ppomppu.co.kr/')
@@ -84,47 +85,12 @@ async function ppomppu_computer() {
     })
 }
 
-async function ppomppu_digital() {
-    console.log('디지털')
-    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&category=5', { responseType: 'arraybuffer' })
-    const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'EUC-KR').toString())
-    let list = []
-    $('tr[class^="list1"],tr[class^="list0"]').each((i, elem) => list.push(elem) ) //; list.push(elem)
-
-    list.reverse().forEach((elem, i, arr) => {
-        const element = $(elem)
-        const id = parseInt($(element.find('td.eng.list_vspace')[0]).text().trim()) || 0
-        const type = $(element.find('nobr')[0]).text().trim()
-        const name = element.find('font.list_title').text().trim()
-        const url = element.find('table > tbody > tr > td > a').attr('href')
-        const thumbnail = element.find('table > tbody > tr > td > a > img').attr('src')
-        let date = ''
-        if(element.find('td:nth-child(4)').attr('title') != undefined){
-            date = element.find('td:nth-child(4)').attr('title').replace(/\./gi, '/')
-        }
-        if (name && data.ppomppu_digital != 0 && data.ppomppu_digital < id) {
-            const embed = new Discord.MessageEmbed()
-                .setColor('#00ff00')
-                .setAuthor('뽐뿌', 'http://www.ppomppu.co.kr/favicon.ico', 'http://www.ppomppu.co.kr/')
-                .setTitle(`[${type}] ${name}`)
-                .setURL(`http://www.ppomppu.co.kr/zboard/${url}`)
-                .setFooter(`등록일: ${date}`)
-            if (thumbnail) embed.setThumbnail(`http:${thumbnail}`)
-            client.send(embed)
-            data.ppomppu_digital = id
-        }
-        if (list.length == i + 1 && data.ppomppu_digital == 0) {
-            data.ppomppu_digital = id
-        }
-    })
-}
-
 async function foppomppu_computer() {
-    console.log('fo컴퓨터')
-    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4&category=3', { responseType: 'arraybuffer' })
+    console.log('해외뽐뿌')
+    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4', { responseType: 'arraybuffer' })
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'EUC-KR').toString())
     let list = []
-    $('tr[class^="list1"],tr[class^="list0"]').each((i, elem) => list.push(elem) ) //; list.push(elem)
+    $('tr[class^="common-list1"],tr[class^="common-list0"]').each((i, elem) => list.push(elem) ) //; list.push(elem)
 
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
@@ -155,11 +121,11 @@ async function foppomppu_computer() {
 }
 
 async function foppomppu_digital() {
-    console.log('fo디지털')
-    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4&category=4', { responseType: 'arraybuffer' })
+    console.log('알리뽐뿌')
+    const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu8', { responseType: 'arraybuffer' })
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'EUC-KR').toString())
     let list = []
-    $('tr[class^="list1"],tr[class^="list0"]').each((i, elem) => list.push(elem) ) //; list.push(elem)
+    $('tr[class^="common-list1"],tr[class^="common-list0"]').each((i, elem) => list.push(elem) ) //; list.push(elem)
 
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
@@ -271,27 +237,28 @@ async function coolnjoy_digital() {
     const html = await axios.get('https://coolenjoy.net/bbs/jirum', {responseType: 'arraybuffer'})
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'UTF-8').toString())
     let list = []
-    $('div.tbl_head01.tbl_wrap > table > tbody > tr').each((i, elem) => list.push(elem))
+    $('#bo_list > ul > li').each((i, elem) => list.push(elem))
     list.reverse().forEach((elem, i, arr) => {
         const element = $(elem)
-        const type = element.find('td.td_num').text().trim()
+        const type = element.find('div#abcd').text().trim()
         const arrtt = ['PC관련','게임', '모바일', '가전'];
         if (arrtt.indexOf(type) >= 0){
-            const id = parseInt(element.find('td.td_subject > a').attr('href').replace("https://coolenjoy.net:443/bbs/jirum/", "").trim()) || 0
-            const name = $(element.find('td.td_subject > a')[0]).text().substring(0, $(element.find('td.td_subject > a')[0]).text().indexOf("댓글")).trim()
-            const url = element.find('td.td_subject > a').attr('href')
+            const id = parseInt(element.find('a.na-subject').attr('href').replace("https://coolenjoy.net/bbs/jirum/", "").trim()) || 0
+            const name = $(element.find('a.na-subject')).text().trim()
+            const url = element.find('a.na-subject').attr('href')
+            const mount = element.find('div:nth-child(3) > font').text().trim()
             let date = ''
-            if (element.find('td.td_date').text().trim().length < 6) {
+            if (element.find('div:nth-child(5) > span.sr-only').text().trim().length < 6) {
                 date = today()
-            } else date = element.find('td.td_date').text().trim().replace(/\./gi, '/')
+            } else date = element.find('div:nth-child(5) > span.sr-only').text().trim().replace(/\./gi, '/')
             if (arrtt.indexOf(type) >= 0 && name && data.coolnjoy_digital != 0 && data.coolnjoy_digital < id) {
                 const embed = new Discord.MessageEmbed()
                     .setColor('#00ff00')
-                    .setAuthor('쿨앤조이', 'https://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg', 'https://quasarzone.com/')
-                    .setTitle(`[${type}] ${name}`)
+                    .setAuthor('쿨앤조이', 'http://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg', 'https://quasarzone.com/')
+                    .setTitle(`[${type}] ${name} (${mount})`)
                     .setURL(`${url}`)
                     .setFooter(`등록일: ${date}`)
-                    .setThumbnail(`https://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg`)
+                    .setThumbnail(`http://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg`)
                 client.send(embed)
                 data.coolnjoy_digital = id
             }

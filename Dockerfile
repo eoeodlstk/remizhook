@@ -7,7 +7,8 @@ COPY package.json /app/
 RUN npm install
 RUN npm install -g typescript@4.8.4
 COPY ./src/ /app/src/
-COPY .env /app/
+#COPY .env /app/
+#COPY data.json /app/
 COPY tsconfig.json /app/
 RUN tsc --build
 #RUN npm run build-ts
