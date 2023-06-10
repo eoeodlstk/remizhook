@@ -72,7 +72,7 @@ async function ppomppu_computer() {
             const embed = new Discord.MessageEmbed()
                 .setColor('#00ff00')
                 .setAuthor('뽐뿌', 'http://www.ppomppu.co.kr/favicon.ico', 'http://www.ppomppu.co.kr/')
-                .setTitle(`[${type}] ${name}`)
+                .setTitle(`${type} ${name}`)
                 .setURL(`http://www.ppomppu.co.kr/zboard/${url}`)
                 .setFooter(`등록일: ${date}`)
             if (thumbnail) embed.setThumbnail(`http:${thumbnail}`)
