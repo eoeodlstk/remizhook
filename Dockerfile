@@ -1,10 +1,18 @@
-FROM node:14.16.1
+FROM node:16-alpine
+USER root
 LABEL authors="jongchulno"
 LABEL version="1.0"
 LABEL description="This is a Dockerfile for nodejs"
+# chromium 설치
+RUN apk add --no-cache udev ttf-freefont chromium
+# npm 설치 시 chromium 다운하지 않도록 설정
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+# 설치된 위치를 환경 변수로 설정(node에서 사용)
+ENV CHROMIUM_PATH /usr/bin/chromium-browser
 WORKDIR /app
 COPY package.json /app/
-RUN npm install
+RUN npm config set strict-ssl false
+RUN npm install --unsafe-perm
 RUN npm install -g typescript@4.8.4
 COPY ./src/ /app/src/
 #COPY .env /app/

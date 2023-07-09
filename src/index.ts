@@ -7,7 +7,10 @@ import cron from 'node-cron'
 //import Twitter from 'node-tweet-stream'
 import dateFormat from 'dateformat'
 import { data, saveData, loadData } from './data'
+import puppeteer from 'puppeteer-extra'
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 
+puppeteer.use(StealthPlugin());
 dotenv.config()
 loadData()
 const client = new Discord.WebhookClient(process.env.DISCORDBOT, process.env.DISCORDTOKEN)
@@ -154,6 +157,74 @@ async function foppomppu_digital() {
         }
     })
 }
+async function quasar_digital() {
+    console.log('퀘이사존')
+    try {
+        const browser = await puppeteer.launch({
+            headless: 'new',
+            executablePath: process.env.CHROMIUM_PATH,
+            args: [
+                '--no-sandbox',
+                '--ignore-certificate-errors' // Add this line
+            ]
+        });
+
+        const page = await browser.newPage();
+        await page.goto('https://quasarzone.com/bbs/qb_saleinfo', {
+            waitUntil: 'networkidle0',
+        });
+
+        const html = await page.content();
+        const $ = cheerio.load(iconv.decode(Buffer.from(html), 'UTF-8').toString())
+        let list = []
+        $('div[class^="market-type-list market-info-type-list relative"] > table > tbody > tr').each((i, elem) => list.push(elem))
+        list.reverse().forEach((elem, i, arr) => {
+            const element = $(elem)
+            const tmid = element.find('div.thumb-wrap > a').attr('href');
+            let regex = /\/views\/(\d+)/;
+            let match = tmid.match(regex);
+            let id = 0;
+            if(match) {
+                id = Number(match[1])  // Outputs the number after '/views/' in the href attribute
+            }
+            const type = element.find('span.category').text().trim()
+            const arrtt = ['PC/하드웨어','게임/SW', '노트북/모바일', '가전/TV'];
+            const markeinfo = element.find('div.market-info-list-cont > div.market-info-sub > p > span')
+            const gha = $(markeinfo[1]).find('span').text()
+            const bea = $(markeinfo[3]).text()
+            const name = element.find('div.market-info-list-cont > p.tit > a > span.ellipsis-with-reply-cnt').text()
+            const url = element.find('div.market-info-list-cont > p.tit > a ').attr('href')
+            let thumbnail = element.find('div.thumb-wrap > a > img').attr('src')
+            if(thumbnail == "/themes/quasarzone/images/common/no_images.jpg"){
+                thumbnail = "https://quasarzone.com"+thumbnail
+            }
+            let date = ''
+            if (markeinfo.find('span.date').text().trim().length < 6) {
+                date = today()
+            } else date = markeinfo.find('span.date').text().trim().replace(/\./gi, '/')
+
+            if (arrtt.indexOf(type) >= 0 && name && data.quasa_digital != 0 && data.quasa_digital < id) {
+                const embed = new Discord.MessageEmbed()
+                    .setColor('#00ff00')
+                    .setAuthor('퀘이사존', 'https://quasarzone.com/favicon.ico', 'https://quasarzone.com/')
+                    .setTitle(`[${type}] ${name} (${gha} / ${bea})`)
+                    .setURL(`https://quasarzone.com${url}`)
+                    .setFooter(`등록일: ${date}`)
+                if (thumbnail) embed.setThumbnail(`${thumbnail}`)
+                client.send(embed)
+                data.quasa_digital = id
+            }
+
+            if (list.length == i + 1 && data.quasa_digital == 0) {
+                data.quasa_digital = id
+            }
+        })
+
+        await browser.close();
+    } catch (err) {
+        console.error(err); // Use console.error to log errors
+    }
+}
 
 async function ruriweb_digital() {
     console.log('루리')
@@ -189,49 +260,6 @@ async function ruriweb_digital() {
     })
 }
 
-async function quasar_digital() {
-    console.log('퀘이사존')
-    const html = await axios.get('https://quasarzone.com/bbs/qb_saleinfo?_method=post&type&page=1&_token=GVSUCeQILtnnNS9pigMNpYcr4JCu7PiMl5Kyy6Kh&category&popularity&kind=subject&keyword&sort=num%2C+reply&direction=DESC', {responseType: 'arraybuffer'})
-    const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'UTF-8').toString())
-    let list = []
-    $('div[class^="market-type-list market-info-type-list relative"] > table > tbody > tr').each((i, elem) => list.push(elem))
-    list.reverse().forEach((elem, i, arr) => {
-        const element = $(elem)
-        const id = parseInt(element.find('div.thumb-wrap > a').attr('href').substring(0, element.find('div.thumb-wrap > a').attr('href').indexOf("?")).replace("/bbs/qb_saleinfo/views/", "").trim()) || 0
-        const type = element.find('span.category').text().trim()
-        const arrtt = ['PC/하드웨어','게임/SW', '노트북/모바일', '가전/TV'];
-        const markeinfo = element.find('div.market-info-list-cont > div.market-info-sub > p > span')
-        const gha = $(markeinfo[1]).find('span').text()
-        const bea = $(markeinfo[3]).text()
-        const name = element.find('div.market-info-list-cont > p.tit > a > span.ellipsis-with-reply-cnt').text()
-        const url = element.find('div.market-info-list-cont > p.tit > a ').attr('href')
-        let thumbnail = element.find('div.thumb-wrap > a > img').attr('src')
-        if(thumbnail == "/themes/quasarzone/images/common/no_images.jpg"){
-            thumbnail = "https://quasarzone.com"+thumbnail
-        }
-        let date = ''
-        if (markeinfo.find('span.date').text().trim().length < 6) {
-            date = today()
-        } else date = markeinfo.find('span.date').text().trim().replace(/\./gi, '/')
-
-        if (arrtt.indexOf(type) >= 0 && name && data.quasa_digital != 0 && data.quasa_digital < id) {
-            const embed = new Discord.MessageEmbed()
-                .setColor('#00ff00')
-                .setAuthor('퀘이사존', 'https://quasarzone.com/themes/quasarzone/images/common/no_images.jpg', 'https://quasarzone.com/')
-                .setTitle(`[${type}] ${name} (${gha} / ${bea})`)
-                .setURL(`https://quasarzone.com${url}`)
-                .setFooter(`등록일: ${date}`)
-            if (thumbnail) embed.setThumbnail(`${thumbnail}`)
-            client.send(embed)
-            data.quasa_digital = id
-        }
-
-        if (list.length == i + 1 && data.quasa_digital == 0) {
-            data.quasa_digital = id
-        }
-    })
-}
-
 async function coolnjoy_digital() {
     console.log('쿨앤조이')
     const html = await axios.get('https://coolenjoy.net/bbs/jirum', {responseType: 'arraybuffer'})
@@ -254,7 +282,7 @@ async function coolnjoy_digital() {
             if (arrtt.indexOf(type) >= 0 && name && data.coolnjoy_digital != 0 && data.coolnjoy_digital < id) {
                 const embed = new Discord.MessageEmbed()
                     .setColor('#00ff00')
-                    .setAuthor('쿨앤조이', 'http://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg', 'https://quasarzone.com/')
+                    .setAuthor('쿨앤조이', 'http://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg', 'https://coolenjoy.net/')
                     .setTitle(`[${type}] ${name} (${mount})`)
                     .setURL(`${url}`)
                     .setFooter(`등록일: ${date}`)

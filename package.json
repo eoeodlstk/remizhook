@@ -10,13 +10,18 @@
   "author": "eoeodlstk",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^1.4.0",
     "cheerio": "^1.0.0-rc.9",
     "dateformat": "^4.5.1",
     "discord.js": "^12.5.3",
     "dotenv": "^9.0.2",
     "iconv-lite": "^0.6.2",
-    "node-cron": "^3.0.0"
+    "node-cron": "^3.0.0",
+    "prettier": "3.0.0",
+    "puppeteer": "20.8.0",
+    "puppeteer-core": "20.8.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.28",
