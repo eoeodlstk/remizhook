@@ -1,6 +1,6 @@
 {
   "name": "RemizDiscordBot",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "This is a description of my project.",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
     "axios": "^1.4.0",
     "cheerio": "^1.0.0-rc.9",
     "dateformat": "^4.5.1",
-    "discord.js": "^12.5.3",
+    "discord.js": "^14.11.0",
     "dotenv": "^9.0.2",
     "iconv-lite": "^0.6.2",
     "node-cron": "^3.0.0",
@@ -21,12 +21,13 @@
     "puppeteer": "20.8.0",
     "puppeteer-core": "20.8.0",
     "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "twitter-api-v2": "^1.15.1"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.28",
     "@types/dateformat": "^3.0.1",
-    "@types/node": "^15.3.0",
+    "@types/node": "^18.17.1",
     "@types/request": "^2.48.5",
     "typescript": "^4.8.4"
   }

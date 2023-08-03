@@ -1,27 +1,18 @@
-import Discord, { TextChannel } from 'discord.js'
-import dotenv,{ config } from "dotenv"
+import Discord, {EmbedBuilder} from 'discord.js'
+import dotenv from "dotenv"
 import cheerio from 'cheerio'
 import axios from 'axios'
 import iconv from 'iconv-lite'
 import cron from 'node-cron'
-//import Twitter from 'node-tweet-stream'
-import dateFormat from 'dateformat'
-import { data, saveData, loadData } from './data'
+import {data, loadData, saveData} from './data'
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 
 puppeteer.use(StealthPlugin());
 dotenv.config()
 loadData()
-const client = new Discord.WebhookClient(process.env.DISCORDBOT, process.env.DISCORDTOKEN)
-/*
-const t = new Twitter({
-    consumer_key: process.env.CONSUMER_KEY,
-    consumer_secret: process.env.CONSUMER_SECRET,
-    token: process.env.TOKEN ,
-    token_secret: process.env.TOKEN_SECRET
-})
-*/
+const client = new Discord.WebhookClient({id: process.env.DISCORDBOT, token:process.env.DISCORDTOKEN})
+
 // cron.schedule('*/20 7-23,0-3 * * *', async () => {
 cron.schedule('*/10 * * * *', async () => {
     await ppomppu_computer()
@@ -34,23 +25,8 @@ cron.schedule('*/10 * * * *', async () => {
     await fodeal_digital()
     saveData()
 })
-/*
-t.follow('2596141345')
 
-t.on('tweet', tweet => {
-    if (tweet.user.id != '2596141345') return
-    const date = new Date(tweet.created_at)
-    date.setHours(date.getHours() + 9)
-    const embed = new Discord.MessageEmbed()
-        .setColor('#00acee')
-        .setAuthor(`${tweet.user.name} (@${tweet.user.screen_name})`, tweet.user.profile_image_url, `https://twitter.com/${tweet.user.screen_name}`)
-        .setDescription(tweet.text.replace(/https:\/\/t.co\/\w*!/, ''))
-        .setFooter(dateFormat(date, 'yyyy년 mm월 dd일 HH시 MM분 ss초'))
-    if (tweet.entities.media)
-        embed.setImage(tweet.entities.media[0].media_url)
-    client.send(embed)
-})
-*/
+
 async function ppomppu_computer() {
     console.log('국내뽐뿌')
     const html = await axios.get('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu', { responseType: 'arraybuffer' })
@@ -72,14 +48,16 @@ async function ppomppu_computer() {
             date = element.find('td:nth-child(4)').attr('title').replace(/\./gi, '/')
         }
         if (arrtt.indexOf(type) >= 0 && name && data.ppomppu_computer != 0 && data.ppomppu_computer < id) {
-            const embed = new Discord.MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setColor('#00ff00')
-                .setAuthor('뽐뿌', 'http://www.ppomppu.co.kr/favicon.ico', 'http://www.ppomppu.co.kr/')
+                .setAuthor({name: '뽐뿌', iconURL: 'http://www.ppomppu.co.kr/favicon.ico', url: 'http://www.ppomppu.co.kr/'})
                 .setTitle(`${type} ${name}`)
                 .setURL(`https://www.ppomppu.co.kr/zboard/${url}`)
-                .setFooter(`등록일: ${date}`)
+                .setFooter({text: `등록일: ${date}`})
             if (thumbnail) embed.setThumbnail(`http:${thumbnail}`)
-            client.send(embed)
+            client.send({
+                embeds: [embed],
+            });
             data.ppomppu_computer = id
         }
         if (list.length == i + 1 && data.ppomppu_computer == 0) {
@@ -107,14 +85,16 @@ async function foppomppu_computer() {
             date = element.find('td:nth-child(4)').attr('title').replace(/\./gi, '/')
         }
         if (name && data.foppomppu_computer != 0 && data.foppomppu_computer < id) {
-            const embed = new Discord.MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setColor('#00ff00')
-                .setAuthor('뽐뿌', 'http://www.ppomppu.co.kr/favicon.ico', 'http://www.ppomppu.co.kr/')
+                .setAuthor({name: '해외뽐뿌', iconURL: 'http://www.ppomppu.co.kr/favicon.ico', url: 'http://www.ppomppu.co.kr/'})
                 .setTitle(`[${type}] ${name}`)
                 .setURL(`https://www.ppomppu.co.kr/zboard/${url}`)
-                .setFooter(`등록일: ${date}`)
+                .setFooter({text: `등록일: ${date}`})
             if (thumbnail) embed.setThumbnail(`http:${thumbnail}`)
-            client.send(embed)
+            client.send({
+                embeds: [embed],
+            });
             data.foppomppu_computer = id
         }
         if (list.length == i + 1 && data.foppomppu_computer == 0) {
@@ -142,14 +122,16 @@ async function foppomppu_digital() {
             date = element.find('td:nth-child(4)').attr('title').replace(/\./gi, '/')
         }
         if (name && data.foppomppu_digital != 0 && data.foppomppu_digital < id) {
-            const embed = new Discord.MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setColor('#00ff00')
-                .setAuthor('뽐뿌', 'http://www.ppomppu.co.kr/favicon.ico', 'http://www.ppomppu.co.kr/')
+                .setAuthor({name: '알리뽐뿌', iconURL: 'http://www.ppomppu.co.kr/favicon.ico', url: 'http://www.ppomppu.co.kr/'})
                 .setTitle(`[${type}] ${name}`)
                 .setURL(`https://www.ppomppu.co.kr/zboard/${url}`)
-                .setFooter(`등록일: ${date}`)
+                .setFooter({text: `등록일: ${date}`})
             if (thumbnail) embed.setThumbnail(`http:${thumbnail}`)
-            client.send(embed)
+            client.send({
+                embeds: [embed],
+            });
             data.foppomppu_digital = id
         }
         if (list.length == i + 1 && data.foppomppu_digital == 0) {
@@ -194,24 +176,29 @@ async function quasar_digital() {
             const bea = $(markeinfo[3]).text()
             const name = element.find('div.market-info-list-cont > p.tit > a > span.ellipsis-with-reply-cnt').text()
             const url = element.find('div.market-info-list-cont > p.tit > a ').attr('href')
+            /*
             let thumbnail = element.find('div.thumb-wrap > a > img').attr('src')
             if(thumbnail == "/themes/quasarzone/images/common/no_images.jpg"){
                 thumbnail = "https://quasarzone.com"+thumbnail
             }
+
+             */
             let date = ''
             if (markeinfo.find('span.date').text().trim().length < 6) {
                 date = today()
             } else date = markeinfo.find('span.date').text().trim().replace(/\./gi, '/')
 
             if (arrtt.indexOf(type) >= 0 && name && data.quasa_digital != 0 && data.quasa_digital < id) {
-                const embed = new Discord.MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setColor('#00ff00')
-                    .setAuthor('퀘이사존', 'https://quasarzone.com/favicon.ico', 'https://quasarzone.com/')
+                    .setAuthor({name: '퀘이사존', iconURL: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE353R6jMRwECRZPAis-gAZjFey1dfi-A9jZuSWmy2FOE3iEU573TKhpSqm5G2G54Zz_Y&usqp=CAU', url: 'https://quasarzone.com/'})
                     .setTitle(`[${type}] ${name} (${gha} / ${bea})`)
                     .setURL(`https://quasarzone.com${url}`)
-                    .setFooter(`등록일: ${date}`)
-                if (thumbnail) embed.setThumbnail(`${thumbnail}`)
-                client.send(embed)
+                    .setFooter({text: `등록일: ${date}`})
+                    .setThumbnail(`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE353R6jMRwECRZPAis-gAZjFey1dfi-A9jZuSWmy2FOE3iEU573TKhpSqm5G2G54Zz_Y&usqp=CAU`)
+                client.send({
+                    embeds: [embed],
+                });
                 data.quasa_digital = id
             }
 
@@ -244,14 +231,16 @@ async function ruriweb_digital() {
             date = today()
         } else date = element.find('td.time').text().trim().replace(/\./gi, '/')
         if (arrtt.indexOf(type) >= 0 && url != undefined && name && data.ruri_digital != 0 && data.ruri_digital < id) {
-            const embed = new Discord.MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setColor('#00ff00')
-                .setAuthor('루리웹', 'https://img.ruliweb.com/img/2016/icon/ruliweb_icon_144_144.png', 'https://www.ruliweb.com/')
+                .setAuthor({name: '루리웹', iconURL: 'https://img.ruliweb.com/img/2016/icon/ruliweb_icon_144_144.png', url: 'https://www.ruliweb.com/'})
                 .setTitle(`[${type}] ${name}`)
                 .setURL(`${url}`)
-                .setFooter(`등록일: ${date}`)
+                .setFooter({text: `등록일: ${date}`})
                 .setThumbnail(`https://img.ruliweb.com/img/2016/icon/ruliweb_icon_144_144.png`)
-            client.send(embed)
+            client.send({
+                embeds: [embed],
+            });
             data.ruri_digital = id
         }
         if (list.length == i + 1 && data.ruri_digital == 0) {
@@ -280,14 +269,16 @@ async function coolnjoy_digital() {
                 date = today()
             } else date = element.find('div:nth-child(5) > span.sr-only').text().trim().replace(/\./gi, '/')
             if (arrtt.indexOf(type) >= 0 && name && data.coolnjoy_digital != 0 && data.coolnjoy_digital < id) {
-                const embed = new Discord.MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setColor('#00ff00')
-                    .setAuthor('쿨앤조이', 'http://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg', 'https://coolenjoy.net/')
+                    .setAuthor({name: '쿨앤조이', iconURL: 'http://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg', url: 'https://coolenjoy.net/'})
                     .setTitle(`[${type}] ${name} (${mount})`)
                     .setURL(`${url}`)
-                    .setFooter(`등록일: ${date}`)
+                    .setFooter({text: `등록일: ${date}`})
                     .setThumbnail(`http://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg`)
-                client.send(embed)
+                client.send({
+                    embeds: [embed],
+                });
                 data.coolnjoy_digital = id
             }
 
@@ -325,14 +316,16 @@ async function deal_digital() {
                 url = 'http:'+url
             }
             if (arrtt.indexOf(type) >= 0 && name && data.deal_digital != 0 && data.deal_digital < id) {
-                const embed = new Discord.MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setColor('#00ff00')
-                    .setAuthor('딜바다', 'http://cdn.dealbada.com/img/fav_ocean.png', 'http://www.dealbada.com/')
+                    .setAuthor({name: '딜바다', iconURL: 'http://cdn.dealbada.com/img/fav_ocean.png', url: 'http://www.dealbada.com/'})
                     .setTitle(`[${type}] ${name}`)
                     .setURL(`${url}`)
-                    .setFooter(`등록일: ${date}`)
+                    .setFooter({text: `등록일: ${date}`})
                 if (thumbnail) embed.setThumbnail(`${thumbnail}`)
-                client.send(embed)
+                client.send({
+                    embeds: [embed],
+                });
                 data.deal_digital = id
             }
 
@@ -370,14 +363,16 @@ async function fodeal_digital() {
                 url = 'http:'+url
             }
             if (arrtt.indexOf(type) >= 0 && name && data.fodeal_digital != 0 && data.fodeal_digital < id) {
-                const embed = new Discord.MessageEmbed()
+                const embed = new EmbedBuilder()
                     .setColor('#00ff00')
-                    .setAuthor('딜바다', 'http://cdn.dealbada.com/img/fav_ocean.png', 'http://www.dealbada.com/')
+                    .setAuthor({name: '해외딜바다', iconURL: 'http://cdn.dealbada.com/img/fav_ocean.png', url: 'http://www.dealbada.com/'})
                     .setTitle(`[${type}] ${name}`)
                     .setURL(`${url}`)
-                    .setFooter(`등록일: ${date}`)
+                    .setFooter({text: `등록일: ${date}`})
                 if (thumbnail) embed.setThumbnail(`${thumbnail}`)
-                client.send(embed)
+                client.send({
+                    embeds: [embed],
+                });
                 data.fodeal_digital = id
             }
 
@@ -390,18 +385,8 @@ async function fodeal_digital() {
 
 function today(){
     const today = new Date();
-    const dd = today.getDate();
-    const mm = today.getMonth()+1; //January is 0!
+    const dd = String(today.getDate()).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
     const yyyy = today.getFullYear();
-    let today1 : string = ''
-    let dd1 : string = ''+dd
-    let mm1 : string = ''+mm
-    let yyyy1 : string = ''+yyyy
-    if(dd<10) {
-        dd1='0'+dd1
-    }
-    if(mm<10) {
-        mm1='0'+mm
-    }
-    return today1 = yyyy1+'/'+mm1+'/'+dd1;
+    return `${yyyy}/${mm}/${dd}`;
 }
