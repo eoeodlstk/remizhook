@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:18-alpine
 USER root
 LABEL authors="jongchulno"
 LABEL version="1.0"
@@ -12,8 +12,9 @@ ENV CHROMIUM_PATH /usr/bin/chromium-browser
 WORKDIR /app
 COPY package.json /app/
 RUN npm config set strict-ssl false
+RUN npm install -g npm@9.8.1
 RUN npm install --unsafe-perm
-RUN npm install -g typescript@4.8.4
+RUN npm install -g typescript@5.1.6
 COPY ./src/ /app/src/
 #COPY .env /app/
 #COPY data.json /app/
