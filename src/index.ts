@@ -23,6 +23,7 @@ cron.schedule('*/10 * * * *', async () => {
     await coolnjoy_digital()
     await deal_digital()
     await fodeal_digital()
+    await arcalive()
     saveData()
 })
 
@@ -173,12 +174,14 @@ async function quasar_digital() {
         if (!html) {
             throw new Error('HTML content is undefined');
         }
+        console.log(1234);
         const $ = cheerio.load(iconv.decode(Buffer.from(html), 'UTF-8').toString())
         let list = []
         $('div[class^="market-type-list market-info-type-list relative"] > table > tbody > tr').each((i, elem) => list.push(elem))
         list.reverse().forEach((elem, i, arr) => {
             const element = $(elem)
             const tmid = element.find('div.thumb-wrap > a').attr('href');
+            console.log(tmid);
             let regex = /\/views\/(\d+)/;
             let match = tmid.match(regex);
             let id = 0;
@@ -410,6 +413,56 @@ async function fodeal_digital() {
                 if (list.length == i + 1 && data.fodeal_digital == 0) {
                     data.fodeal_digital = id
                 }
+            }
+        })
+    } catch (err) {
+        console.error(err); // Use console.error to log errors
+    } finally {
+        await browser.close();
+    }
+}
+
+async function arcalive(){
+    console.log('arcalive')
+    const { browser, page } = await getHtml('https://arca.live/b/hotdeal');
+    try {
+        const html = await page.content(); // 비동기 처리
+        if (!html) {
+            throw new Error('HTML content is undefined');
+        }
+        const $ = cheerio.load(iconv.decode(Buffer.from(html), 'UTF-8').toString())
+        let list = []
+        $('div[class^="list-table hybrid"] > div[class^="vrow hybrid"]').each((i, elem) => list.push(elem))
+        list.reverse().forEach((elem, i, arr) => {
+            const element = $(elem)
+            const id = parseInt(element.find('a.title.hybrid-title').attr('href').replace("/b/hotdeal/", "").replace("?p1", ""))
+            const type = element.find('a.badge').text().trim();
+            const title = element.find('a.title.hybrid-title').text().replace(/\n|\[\d+\]/g, '').trim();
+            const price = element.find('a.title.hybrid-bottom').find('div.vrow-bottom.deal').find('span.deal-price').text().trim()
+            const dele = element.find('a.title.hybrid-bottom').find('div.vrow-bottom.deal').find('span.deal-delivery').text().trim()
+            const name = title+"("+price+"/"+dele+")"
+            const arrtt = ['전자제품','PC/하드웨어', 'SW/게임', '임박', '기타'];
+            const url = element.find('a.title.hybrid-title').attr('href')
+            let thumbnail = element.find('a.title.preview-image').find('div.vrow-preview').find('img').attr('src')
+            if(thumbnail.split('?')[0].endsWith('.gif')){
+                thumbnail = ""
+            }
+            let date = today()
+            if (arrtt.indexOf(type) >= 0 && name && data.hotdeal_chanel != 0 && data.hotdeal_chanel < id) {
+                const embed = new EmbedBuilder()
+                    .setColor('#00ff00')
+                    .setAuthor({name: '핫딜채널', iconURL: 'https://arca.live/static/favicon.ico', url: 'https://arca.live/'})
+                    .setTitle(`${type} ${name}`)
+                    .setURL(`https://arca.live/${url}`)
+                    .setFooter({text: `등록일: ${date}`})
+                if (thumbnail) embed.setThumbnail(`http:${thumbnail}`)
+                client.send({
+                    embeds: [embed],
+                });
+                data.hotdeal_chanel = id
+            }
+            if (list.length == i + 1 && data.hotdeal_chanel == 0) {
+                data.hotdeal_chanel = id
             }
         })
     } catch (err) {

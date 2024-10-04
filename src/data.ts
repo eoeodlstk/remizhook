@@ -9,6 +9,7 @@ class Data {
     coolnjoy_digital: number = 0
     deal_digital: number = 0
     fodeal_digital: number = 0
+    hotdeal_chanel: number = 0
 }
 
 export let data = new Data()
