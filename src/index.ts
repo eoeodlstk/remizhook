@@ -453,7 +453,7 @@ async function arcalive(){
                     .setColor('#00ff00')
                     .setAuthor({name: '핫딜채널', iconURL: 'https://arca.live/static/favicon.ico', url: 'https://arca.live/'})
                     .setTitle(`${type} ${name}`)
-                    .setURL(`https://arca.live/${url}`)
+                    .setURL(`https://arca.live${url}`)
                     .setFooter({text: `등록일: ${date}`})
                 if (thumbnail) embed.setThumbnail(`http:${thumbnail}`)
                 client.send({
