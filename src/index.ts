@@ -14,7 +14,7 @@ loadData()
 const client = new Discord.WebhookClient({id: process.env.DISCORDBOT, token:process.env.DISCORDTOKEN})
 
 // cron.schedule('*/20 7-23,0-3 * * *', async () => {
-cron.schedule('*/10 * * * *', async () => {
+cron.schedule('*/15 * * * *', async () => {
     await ppomppu_computer()
     await foppomppu_computer()
     await foppomppu_digital()
