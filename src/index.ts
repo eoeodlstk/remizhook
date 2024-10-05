@@ -174,14 +174,12 @@ async function quasar_digital() {
         if (!html) {
             throw new Error('HTML content is undefined');
         }
-        console.log(1234);
         const $ = cheerio.load(iconv.decode(Buffer.from(html), 'UTF-8').toString())
         let list = []
         $('div[class^="market-type-list market-info-type-list relative"] > table > tbody > tr').each((i, elem) => list.push(elem))
         list.reverse().forEach((elem, i, arr) => {
             const element = $(elem)
             const tmid = element.find('div.thumb-wrap > a').attr('href');
-            console.log(tmid);
             let regex = /\/views\/(\d+)/;
             let match = tmid.match(regex);
             let id = 0;
