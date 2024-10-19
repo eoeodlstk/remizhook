@@ -14,7 +14,7 @@ loadData()
 const client = new Discord.WebhookClient({id: process.env.DISCORDBOT, token:process.env.DISCORDTOKEN})
 
 // cron.schedule('*/20 7-23,0-3 * * *', async () => {
-cron.schedule('*/15 * * * *', async () => {
+cron.schedule('*/1 * * * *', async () => {
     await ppomppu_computer()
     await foppomppu_computer()
     await foppomppu_digital()
@@ -29,7 +29,6 @@ cron.schedule('*/15 * * * *', async () => {
 
 
 async function ppomppu_computer() {
-    console.log('국내뽐뿌')
     const { browser, page } = await getHtml('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu');
     try {
         const html = await page.content(); // 비동기 처리
@@ -76,7 +75,6 @@ async function ppomppu_computer() {
 }
 
 async function foppomppu_computer() {
-    console.log('해외뽐뿌')
     const { browser, page } = await getHtml('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu4');
     try {
         const html = await page.content(); // 비동기 처리
@@ -122,7 +120,6 @@ async function foppomppu_computer() {
 }
 
 async function foppomppu_digital() {
-    console.log('알리뽐뿌')
     const { browser, page } = await getHtml('https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu8');
     try {
         const html = await page.content(); // 비동기 처리
@@ -167,7 +164,6 @@ async function foppomppu_digital() {
     }
 }
 async function quasar_digital() {
-    console.log('퀘이사존')
     const { browser, page } = await getHtml('https://quasarzone.com/bbs/qb_saleinfo');
     try {
         const html = await page.content(); // 비동기 처리
@@ -231,7 +227,6 @@ async function quasar_digital() {
 }
 
 async function ruriweb_digital() {
-    console.log('루리')
     const html = await axios.get('https://bbs.ruliweb.com/market/board/1020', {responseType: 'arraybuffer'})
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'UTF-8').toString())
     let list = []
@@ -267,7 +262,6 @@ async function ruriweb_digital() {
 }
 
 async function coolnjoy_digital() {
-    console.log('쿨앤조이')
     const html = await axios.get('https://coolenjoy.net/bbs/jirum', {responseType: 'arraybuffer'})
     const $ = cheerio.load(iconv.decode(Buffer.from(html.data), 'UTF-8').toString())
     let list = []
@@ -307,7 +301,6 @@ async function coolnjoy_digital() {
 }
 
 async function deal_digital() {
-    console.log('딜바다')
     const { browser, page } = await getHtml('http://www.dealbada.com/bbs/board.php?bo_table=deal_domestic');
     try {
         const html = await page.content(); // 비동기 처리
@@ -364,7 +357,6 @@ async function deal_digital() {
 }
 
 async function fodeal_digital() {
-    console.log('dhl딜바다')
     const { browser, page } = await getHtml('http://www.dealbada.com/bbs/board.php?bo_table=deal_oversea');
     try {
         const html = await page.content(); // 비동기 처리
@@ -421,7 +413,6 @@ async function fodeal_digital() {
 }
 
 async function arcalive(){
-    console.log('arcalive')
     const { browser, page } = await getHtml('https://arca.live/b/hotdeal');
     try {
         const html = await page.content(); // 비동기 처리
@@ -493,9 +484,12 @@ async function getHtml(url) {
         const page = await browser.newPage();
         await page.goto(url, {
             waitUntil: 'networkidle0',
+            timeout: 60000
         });
         return { browser, page };
     } catch (error) {
-        console.error(error);
+        const now = new Date();
+        const formattedDate = now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+        console.error(formattedDate, error);
     }
 }
