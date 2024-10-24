@@ -491,5 +491,6 @@ async function getHtml(url) {
         const now = new Date();
         const formattedDate = now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
         console.error(formattedDate, error);
+        await browser.close();
     }
 }
