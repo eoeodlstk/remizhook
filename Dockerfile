@@ -25,8 +25,8 @@ RUN npm install -g npm@10.8.3
 RUN npm install --unsafe-perm
 RUN npm install -g typescript@5.6.2
 COPY ./src/ /app/src/
-COPY .env /app/
-COPY data.json /app/
+#COPY .env /app/
+#COPY data.json /app/
 COPY tsconfig.json /app/
 RUN tsc --build
 #RUN npm run build-ts

@@ -261,8 +261,10 @@ function extractArcaData($,element, site, todayDate) {
     const name = title+"("+price+"/"+dele+")"
     const url = element.find('a.title.hybrid-title').attr('href')
     let thumbnail = element.find('a.title.preview-image').find('div.vrow-preview').find('img').attr('src')
-    if(thumbnail.split('?')[0].endsWith('.gif')){
-        thumbnail = ""
+    if(thumbnail !== undefined) {
+        if(thumbnail.split('?')[0].endsWith('.gif')){
+            thumbnail = ""
+        }
     }
     let date = today()
     return { id, type, name, url:`https://arca.live${url}`, thumbnail, date };
