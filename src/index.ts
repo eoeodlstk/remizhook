@@ -14,7 +14,7 @@ loadData()
 const client = new Discord.WebhookClient({id: process.env.DISCORDBOT, token:process.env.DISCORDTOKEN})
 const sites = [
     {
-        name: '뽐뿌 컴퓨터',
+        name: '뽐뿌',
         url: 'https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu',
         selector: 'tr[class^="baseList bbs_new1"]',
         typeFilter: ['[컴퓨터]', '[디지털]', '[가전/가구]'],
@@ -87,7 +87,7 @@ const sites = [
 
 ];
 
-cron.schedule('*/15 * * * *', async () => {
+cron.schedule('*/20 * * * *', async () => {
     const todayDate = today();
     console.log(todayDate);
     await Promise.all(sites.map(site => processSite(site, todayDate)));
@@ -96,7 +96,7 @@ cron.schedule('*/15 * * * *', async () => {
 
 async function processSite(site, todayDate) {
     try {
-        const html = site.useAxios ? await fetchHtmlAxios(site.url) : await fetchHtmlPuppeteer(site.url);
+        const html = site.useAxios ? await fetchHtmlAxios(site.url) : await fetchHtmlPuppeteer(site);
         if (!html) {
             console.error(`HTML content is undefined for ${site.name}`);
             return;
@@ -295,7 +295,7 @@ function shouldSend(itemData, site) {
     return site.typeFilter ? site.typeFilter.includes(itemData.type) && data[site.dataKey] < itemData.id : data[site.dataKey] < itemData.id;
 }
 
-async function fetchHtmlPuppeteer(url) {
+async function fetchHtmlPuppeteer(site) {
     const browser = await puppeteer.launch({
         headless: true,
         executablePath: process.env.CHROMIUM_PATH,
@@ -310,18 +310,24 @@ async function fetchHtmlPuppeteer(url) {
     let page;
     try {
         page = await browser.newPage();
-        await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: 60000 });
+        await page.goto(site.url, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: 60000 });
         return await page.content();
     } catch (error) {
-        console.error(`Error fetching HTML with Puppeteer:`, error);
-        try {
-            console.log('Retrying to load the page...');
-            await page.reload({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: 60000 });
-            return await page.content();
-        } catch (reloadError) {
-            console.error('Error reloading the page:', reloadError);
-            return; // 새로고침 시도 후에도 오류 발생 시 반환
+        console.error(`${site.name} Error fetching HTML with Puppeteer:`, error);
+        let attempts = 0;
+        const maxAttempts = 5;
+        while (attempts < maxAttempts) {
+            try {
+                console.log(`Retrying to load the page... Attempt ${attempts + 1}`);
+                await page.reload({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: 60000 });
+                return await page.content();
+            } catch (reloadError) {
+                console.error(`${site.name} Error reloading the page:`, reloadError);
+                attempts++;
+            }
         }
+        console.error(`${site.name} Failed to load the page after ${maxAttempts} attempts.`);
+        return; // 최대 시도 후에도 오류 발생 시 반환
     } finally {
         await browser.close();
     }
