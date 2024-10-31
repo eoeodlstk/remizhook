@@ -174,14 +174,11 @@ function extractQuasarData($,element, site, todayDate) {
     const bea = $(markeinfo[3]).text()
     const name = element.find('div.market-info-list-cont > p.tit > a > span.ellipsis-with-reply-cnt').text()
     const url = element.find('div.market-info-list-cont > p.tit > a ').attr('href')
-    /*
     let thumbnail = element.find('div.thumb-wrap > a > img').attr('src')
     if(thumbnail == "/themes/quasarzone/images/common/no_images.jpg"){
         thumbnail = "https://quasarzone.com"+thumbnail
     }
-
-     */
-    const thumbnail = `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE353R6jMRwECRZPAis-gAZjFey1dfi-A9jZuSWmy2FOE3iEU573TKhpSqm5G2G54Zz_Y&usqp=CAU`;
+    //const thumbnail = `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE353R6jMRwECRZPAis-gAZjFey1dfi-A9jZuSWmy2FOE3iEU573TKhpSqm5G2G54Zz_Y&usqp=CAU`;
     let date = ''
     if (markeinfo.find('span.date').text().trim().length < 6) {
         date = today()
@@ -218,6 +215,7 @@ function extractRuliwebData($,element, site, todayDate) {
     const thumbnail = `https://img.ruliweb.com/img/2016/icon/ruliweb_icon_144_144.png`;
     return { id, type, name, url, thumbnail, date };
 }
+
 function extractCoolnjoyData($,element, site, todayDate) {
     const id = parseInt(element.find('a.na-subject').attr('href').replace("https://coolenjoy.net/bbs/jirum/", "").trim()) || 0;
     const type = element.find('div#abcd').text().trim();
@@ -231,6 +229,7 @@ function extractCoolnjoyData($,element, site, todayDate) {
     const thumbnail = `http://photo.coolenjoy.net/SWFUpload/resizedemo/saved/a0a7cbc96ab09e01e1f2d67f538d0bbe1.jpg`;
     return { id, type, name, url, thumbnail, date };
 }
+
 function extractDealbadaData($,element, site, todayDate) {
     const id = parseInt(element.find('td.td_num').text()) || 0
     const type = element.find('td.td_cate').text().trim()
@@ -318,6 +317,7 @@ async function fetchHtmlPuppeteer(site) {
         const maxAttempts = 5;
         while (attempts < maxAttempts) {
             try {
+                page = await browser.newPage();
                 console.log(`Retrying to load the page... Attempt ${attempts + 1}`);
                 await page.reload({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: 60000 });
                 return await page.content();
@@ -342,7 +342,6 @@ async function fetchHtmlAxios(url) {
         return;
     }
 }
-
 
 function today(){
     const today = new Date();
