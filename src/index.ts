@@ -175,7 +175,7 @@ function extractQuasarData($,element, site, todayDate) {
     const name = element.find('div.market-info-list-cont > p.tit > a > span.ellipsis-with-reply-cnt').text()
     const url = element.find('div.market-info-list-cont > p.tit > a ').attr('href')
     let thumbnail = element.find('div.thumb-wrap > a > img').attr('src')
-    if(thumbnail == "/themes/quasarzone/images/common/no_images.jpg"){
+    if(thumbnail == "/themes/quasarzone/images/common/thumb_no_image.svg"){
         thumbnail = "https://quasarzone.com"+thumbnail
     }
     //const thumbnail = `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE353R6jMRwECRZPAis-gAZjFey1dfi-A9jZuSWmy2FOE3iEU573TKhpSqm5G2G54Zz_Y&usqp=CAU`;
