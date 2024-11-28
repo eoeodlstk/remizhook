@@ -12,7 +12,7 @@ puppeteer.use(StealthPlugin());
 dotenv.config()
 loadData()
 const client = new Discord.WebhookClient({id: process.env.DISCORDBOT, token:process.env.DISCORDTOKEN})
-const sites = [
+const sitesHourly = [
     {
         name: '뽐뿌',
         url: 'https://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu',
@@ -36,6 +36,26 @@ const sites = [
         dataKey: 'foppomppu_digital'
     },
     {
+        name: '핫딜채널',
+        url: 'https://arca.live/b/hotdeal',
+        selector: 'div[class^="list-table hybrid"] > div[class^="vrow hybrid"]',
+        typeFilter: ['전자제품', 'PC/하드웨어', 'SW/게임', '임박', '기타'],
+        iconURL: 'https://arca.live/static/favicon.ico',
+        dataKey: 'hotdeal_chanel'
+    },
+    {
+        name: '루리웹',
+        url: 'https://bbs.ruliweb.com/market/board/1020',
+        selector: 'tr[class^="table_body"]',
+        typeFilter: ['게임H/W', '게임S/W', 'PC/가전', 'A/V', 'VR'],
+        iconURL: 'https://img.ruliweb.com/img/2016/icon/ruliweb_icon_144_144.png',
+        dataKey: 'ruri_digital',
+        useAxios:true
+    },
+];
+
+const sitesEvery20 = [
+    {
         name: '퀘이사존',
         url: 'https://quasarzone.com/bbs/qb_saleinfo',
         selector: 'div[class^="market-type-list market-info-type-list relative"] > table > tbody > tr',
@@ -55,7 +75,7 @@ const sites = [
         name: '딜바다 국내',
         url: 'http://www.dealbada.com/bbs/board.php?bo_table=deal_domestic',
         selector: 'div.tbl_head01.tbl_wrap > table > tbody > tr',
-        typeFilter: ['컴퓨터', '디지털', '가전'],
+        typeFilter: ['컴퓨터', '디지털'],
         iconURL: 'http://cdn.dealbada.com/img/fav_ocean.png',
         dataKey: 'deal_digital'
     },
@@ -68,23 +88,6 @@ const sites = [
         dataKey: 'fodeal_digital'
     },
     {
-        name: '핫딜채널',
-        url: 'https://arca.live/b/hotdeal',
-        selector: 'div[class^="list-table hybrid"] > div[class^="vrow hybrid"]',
-        typeFilter: ['전자제품', 'PC/하드웨어', 'SW/게임', '임박', '기타'],
-        iconURL: 'https://arca.live/static/favicon.ico',
-        dataKey: 'hotdeal_chanel'
-    },
-    {
-        name: '루리웹',
-        url: 'https://bbs.ruliweb.com/market/board/1020',
-        selector: 'tr[class^="table_body"]',
-        typeFilter: ['게임H/W', '게임S/W', 'PC/가전', 'A/V', 'VR'],
-        iconURL: 'https://img.ruliweb.com/img/2016/icon/ruliweb_icon_144_144.png',
-        dataKey: 'ruri_digital',
-        useAxios:true
-    },
-    {
         name: '쪼드',
         url: 'https://zod.kr/deal',
         selector: 'ul[class^="app-board-template-list zod-board-list--deal"] > li:not(.notice):not(.zod-board-list--deal-ended)',
@@ -95,10 +98,19 @@ const sites = [
     }
 ];
 
-cron.schedule('*/20 * * * *', async () => {
+// 매시간 10, 30, 50분에 실행
+cron.schedule('10,30,50 * * * *', async () => {
     const todayDate = today();
-    console.log(todayDate);
-    await Promise.all(sites.map(site => processSite(site, todayDate)));
+    console.log(`매시간 10, 30, 50분에 실행: ${todayDate}`);
+    await Promise.all(sitesHourly.map(site => processSite(site, todayDate)));
+    saveData();
+});
+
+// 매시간 20, 40, 정각에 실행
+cron.schedule('0,20,40 * * * *', async () => {
+    const todayDate = today();
+    console.log(`매시간 20, 40, 정각에 실행: ${todayDate}`);
+    await Promise.all(sitesEvery20.map(site => processSite(site, todayDate)));
     saveData();
 });
 
