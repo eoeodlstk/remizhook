@@ -2,7 +2,7 @@ FROM node:22.9
 
 USER root
 LABEL authors="jongchulno"
-LABEL version="1.0"
+LABEL version="1.1"
 LABEL description="This is a Dockerfile for nodejs"
 
 # 시스템 패키지 업데이트 및 Google Chrome 설치

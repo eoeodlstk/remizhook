@@ -1,5 +1,5 @@
 # remizhook
-.env.local에 있는 
+.env.local에 있는  
 DISCORDBOT=  
 DISCORDTOKEN=  
 CONSUMER_KEY=  
