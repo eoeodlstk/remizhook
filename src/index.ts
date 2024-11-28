@@ -84,7 +84,15 @@ const sites = [
         dataKey: 'ruri_digital',
         useAxios:true
     },
-
+    {
+        name: '쪼드',
+        url: 'https://zod.kr/deal',
+        selector: 'ul[class^="app-board-template-list zod-board-list--deal"] > li:not(.notice):not(.zod-board-list--deal-ended)',
+        typeFilter: ['PC 하드웨어', '모바일 / 가젯', '노트북', '가전', '게임 / SW'],
+        iconURL: 'https://zod.kr/files/attach/xeicon/favicon.ico?t=1731517578',
+        dataKey: 'zod_digital',
+        useAxios:true
+    }
 ];
 
 cron.schedule('*/20 * * * *', async () => {
@@ -130,7 +138,7 @@ async function processList(list, site, $, todayDate) {
 
 function extractItemData($,element, site, todayDate) {
     switch (site.name) {
-        case '뽐뿌 컴퓨터':
+        case '뽐뿌':
         case '해외뽐뿌':
         case '알리뽐뿌':
             return extractPpOmppuData($,element, site);
@@ -145,9 +153,29 @@ function extractItemData($,element, site, todayDate) {
             return extractDealbadaData($,element, site, todayDate);
         case '핫딜채널':
             return extractArcaData($,element, site, todayDate);
+        case '쪼드':
+            return extractZodData($,element, site, todayDate);
         default:
             return;
     }
+}
+
+function extractZodData($,element, site, todayDate) {
+    const content =  element.find('a.tw-flex-1');
+    const thumbnail = element.find('div.app-thumbnail').find('img').attr('src')
+    const turl = content.attr('href')
+    const turlNumberMatch = turl.match(/\/deal\/(\d+)/);
+    const id = parseInt(turlNumberMatch ? turlNumberMatch[1] : 0);
+    const tname = content.find('div.app-list-title.tw-flex-wrap').find('span').text().trim();
+    const priceElement = content.find('span:contains("가격:")').find('strong');
+    const shippingElement = content.find('span:contains("배송비:")').find('strong');
+    const type = content.find('div.app-list-meta').find('span.zod-board--deal-meta-category').text().trim();
+    const date = content.find('span[title]').attr('title');
+    // 가격과 배송비 값을 가져옵니다.
+    const priceValue = priceElement.length ? priceElement.text().trim() : '';
+    const shippingValue = shippingElement.length ? shippingElement.text().trim() : '';
+    const name =   tname+`  (${priceValue}/${shippingValue})`
+    return { id, type, name, url: `https://zod.kr/deal${turl}`, thumbnail, date };
 }
 
 function extractPpOmppuData($,element, site) {
@@ -270,6 +298,17 @@ function extractArcaData($,element, site, todayDate) {
 }
 
 function sendEmbed(itemData, site) {
+    const filterKeywords = ['저렴하게', '현금당일', '지원금', '즉시지원', '성지', '방법', '개통',
+        '신규가입', '재약정', '당일', '결합', '가입', '렌탈', '상담', '현금사은품'];
+
+    // itemData.name에 필터링 키워드가 포함되어 있는지 확인
+    const containsFilterKeyword = filterKeywords.some(keyword => itemData.name.includes(keyword));
+
+    // 키워드가 포함된 경우 함수를 종료
+    if (containsFilterKeyword) {
+        console.log(`"${itemData.name}" 항목은 필터링되어 건너뜁니다.`);
+        return; // 함수를 종료
+    }
     const embed = new EmbedBuilder()
         .setColor('#00ff00')
         .setAuthor({ name: site.name, iconURL: site.iconURL || '', url: site.url })
@@ -300,8 +339,12 @@ async function fetchHtmlPuppeteer(site) {
         executablePath: process.env.CHROMIUM_PATH,
         args: [
             '--no-sandbox',
-            '--ignore-certificate-errors',
             '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage', // /dev/shm 사용 비활성화
+            '--disable-gpu', // GPU 사용 비활성화
+            '--window-size=1920,1080', // 브라우저 창 크기 설정
+            '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+            '--ignore-certificate-errors',
             '--dns-prefetch-disable', // DNS 프리페치 비활성화
         ],
         protocolTimeout: 60000,
@@ -318,7 +361,6 @@ async function fetchHtmlPuppeteer(site) {
         while (attempts < maxAttempts) {
             try {
                 page = await browser.newPage();
-                console.log(`Retrying to load the page... Attempt ${attempts + 1}`);
                 await page.reload({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: 60000 });
                 return await page.content();
             } catch (reloadError) {
