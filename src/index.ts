@@ -187,7 +187,7 @@ function extractZodData($,element, site, todayDate) {
     const priceValue = priceElement.length ? priceElement.text().trim() : '';
     const shippingValue = shippingElement.length ? shippingElement.text().trim() : '';
     const name =   tname+`  (${priceValue}/${shippingValue})`
-    return { id, type, name, url: `https://zod.kr/deal${turl}`, thumbnail, date };
+    return { id, type, name, url: `https://zod.kr${turl}`, thumbnail, date };
 }
 
 function extractPpOmppuData($,element, site) {
