@@ -75,7 +75,7 @@ const sitesEvery20 = [
         name: '딜바다 국내',
         url: 'http://www.dealbada.com/bbs/board.php?bo_table=deal_domestic',
         selector: 'div.tbl_head01.tbl_wrap > table > tbody > tr',
-        typeFilter: ['컴퓨터', '디지털'],
+        typeFilter: ['컴퓨터', '디지털', '가전'],
         iconURL: 'http://cdn.dealbada.com/img/fav_ocean.png',
         dataKey: 'deal_digital'
     },
@@ -87,6 +87,7 @@ const sitesEvery20 = [
         iconURL:  'http://cdn.dealbada.com/img/fav_ocean.png',
         dataKey: 'fodeal_digital'
     },
+    /*
     {
         name: '쪼드',
         url: 'https://zod.kr/deal',
@@ -96,7 +97,35 @@ const sitesEvery20 = [
         dataKey: 'zod_digital',
         useAxios:true
     }
+    */
 ];
+cron.schedule('*/5 * * * *', async () => {
+    const todayDate = today();
+    console.log(todayDate);
+    const jord = {
+        name: '쪼드',
+        url: 'https://zod.kr/deal',
+        selector: 'ul[class^="app-board-template-list zod-board-list--deal"] > li:not(.notice):not(.zod-board-list--deal-ended)',
+        typeFilter: ['PC 하드웨어', '모바일 / 가젯', '노트북', '가전', '게임 / SW'],
+        iconURL: 'https://zod.kr/files/attach/xeicon/favicon.ico?t=1731517578',
+        dataKey: 'zod_digital',
+        useAxios:true
+    };
+    try {
+        const html = jord.useAxios ? await fetchHtmlAxios(jord.url) : await fetchHtmlPuppeteer(jord);
+        if (!html) {
+            console.error(`HTML content is undefined for ${jord.name}`);
+            return;
+        }
+        const $ = cheerio.load(iconv.decode(Buffer.from(html), 'UTF-8').toString());
+        const list = [];
+        $(jord.selector).each((i, elem) => list.push(elem));
+        await processList(list, jord, $, todayDate);
+    } catch (error) {
+        console.error(`Error processing ${jord.name}:`, error);
+    }
+    saveData();
+});
 
 // 매시간 10, 30, 50분에 실행
 cron.schedule('10,30,50 * * * *', async () => {
@@ -310,17 +339,28 @@ function extractArcaData($,element, site, todayDate) {
 }
 
 function sendEmbed(itemData, site) {
-    const filterKeywords = ['저렴하게', '현금당일', '지원금', '즉시지원', '성지', '방법', '개통',
-        '신규가입', '재약정', '당일', '결합', '가입', '렌탈', '상담', '현금사은품'];
+    const filterKeywords = ['저렴하게', '현금', '지원금', '즉시지원', '성지', '방법', '개통',
+        '신규가입', '재약정', '당일', '결합', '가입', '렌탈', '상담', '설치', '요금제', '알려'];
 
     // itemData.name에 필터링 키워드가 포함되어 있는지 확인
-    const containsFilterKeyword = filterKeywords.some(keyword => itemData.name.includes(keyword));
+    const matchedKeywords = filterKeywords.filter(keyword => {
+        // 키워드가 포함되어 있는지 확인
+        const keywordIndex = itemData.name.indexOf(keyword);
+        // 키워드가 포함되어 있지 않으면 false 반환
+        if (keywordIndex === -1) return false;
+        // 키워드 앞에 "역대"가 있는 경우 필터링 건너뛰기
+        const prefix = itemData.name.substring(Math.max(0, keywordIndex - 2), keywordIndex); // 키워드 앞 2글자 추출
+        if (prefix === '역대') return false;
+        // 필터링 키워드로 간주
+        return true;
+    });
 
-    // 키워드가 포함된 경우 함수를 종료
-    if (containsFilterKeyword) {
-        console.log(`"${itemData.name}" 항목은 필터링되어 건너뜁니다.`);
+
+    if (matchedKeywords.length > 0) {
+        console.log(`"${itemData.name}" 항목은 필터링되어 건너뜁니다. 필터링된 키워드: ${matchedKeywords.join(', ')}`);
         return; // 함수를 종료
     }
+
     const embed = new EmbedBuilder()
         .setColor('#00ff00')
         .setAuthor({ name: site.name, iconURL: site.iconURL || '', url: site.url })
