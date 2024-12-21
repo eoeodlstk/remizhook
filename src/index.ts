@@ -12,6 +12,9 @@ puppeteer.use(StealthPlugin());
 dotenv.config()
 loadData()
 const client = new Discord.WebhookClient({id: process.env.DISCORDBOT, token:process.env.DISCORDTOKEN})
+const client2 = new Discord.WebhookClient({id: process.env.DISCORDBOT2, token:process.env.DISCORDTOKEN2})
+const client3 = new Discord.WebhookClient({id: process.env.DISCORDBOT3, token:process.env.DISCORDTOKEN3})
+
 const sitesHourly = [
     {
         name: '뽐뿌',
@@ -52,6 +55,15 @@ const sitesHourly = [
         dataKey: 'ruri_digital',
         useAxios:true
     },
+    {
+        name: '쪼드',
+        url: 'https://zod.kr/deal',
+        selector: 'ul[class^="app-board-template-list zod-board-list--deal"] > li:not(.notice):not(.zod-board-list--deal-ended)',
+        typeFilter: ['PC 하드웨어', '모바일 / 가젯', '노트북', '가전', '게임 / SW'],
+        iconURL: 'https://zod.kr/files/attach/xeicon/favicon.ico?t=1731517578',
+        dataKey: 'zod_digital',
+        useAxios:true
+    }
 ];
 
 const sitesEvery20 = [
@@ -87,7 +99,6 @@ const sitesEvery20 = [
         iconURL:  'http://cdn.dealbada.com/img/fav_ocean.png',
         dataKey: 'fodeal_digital'
     },
-    /*
     {
         name: '쪼드',
         url: 'https://zod.kr/deal',
@@ -97,35 +108,7 @@ const sitesEvery20 = [
         dataKey: 'zod_digital',
         useAxios:true
     }
-    */
 ];
-cron.schedule('*/5 * * * *', async () => {
-    const todayDate = today();
-    console.log(todayDate);
-    const jord = {
-        name: '쪼드',
-        url: 'https://zod.kr/deal',
-        selector: 'ul[class^="app-board-template-list zod-board-list--deal"] > li:not(.notice):not(.zod-board-list--deal-ended)',
-        typeFilter: ['PC 하드웨어', '모바일 / 가젯', '노트북', '가전', '게임 / SW'],
-        iconURL: 'https://zod.kr/files/attach/xeicon/favicon.ico?t=1731517578',
-        dataKey: 'zod_digital',
-        useAxios:true
-    };
-    try {
-        const html = jord.useAxios ? await fetchHtmlAxios(jord.url) : await fetchHtmlPuppeteer(jord);
-        if (!html) {
-            console.error(`HTML content is undefined for ${jord.name}`);
-            return;
-        }
-        const $ = cheerio.load(iconv.decode(Buffer.from(html), 'UTF-8').toString());
-        const list = [];
-        $(jord.selector).each((i, elem) => list.push(elem));
-        await processList(list, jord, $, todayDate);
-    } catch (error) {
-        console.error(`Error processing ${jord.name}:`, error);
-    }
-    saveData();
-});
 
 // 매시간 10, 30, 50분에 실행
 cron.schedule('10,30,50 * * * *', async () => {
@@ -339,8 +322,8 @@ function extractArcaData($,element, site, todayDate) {
 }
 
 function sendEmbed(itemData, site) {
-    const filterKeywords = ['저렴하게', '현금', '지원금', '즉시지원', '성지', '방법', '개통',
-        '신규가입', '재약정', '당일', '결합', '가입', '렌탈', '상담', '설치', '요금제', '알려'];
+    const filterKeywords = ['저렴하게', '현금', '지원금', '즉시지원', '성지', '방법', '개통', '구독', '최대', '여기서', '싸게 사는법', '혜택 총정리', '잘 주는곳', '곳 알기', '받아보세요', '알아보자', '정수기 추천',
+        '신규가입', '재약정', '당일', '결합', '가입', '렌탈', '상담', '설치', '요금제', '알려', '이거야', '싼곳', '여기', '하세요'];
 
     // itemData.name에 필터링 키워드가 포함되어 있는지 확인
     const matchedKeywords = filterKeywords.filter(keyword => {
@@ -379,6 +362,8 @@ function sendEmbed(itemData, site) {
         embed.setThumbnail(thumbnailUrl);
     }
     client.send({ embeds: [embed] });
+    client2.send({ embeds: [embed] });
+    client3.send({ embeds: [embed] });
 }
 
 function shouldSend(itemData, site) {
