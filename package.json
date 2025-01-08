@@ -18,8 +18,8 @@
     "iconv-lite": "^0.6.3",
     "node-cron": "^3.0.3",
     "prettier": "3.3.3",
-    "puppeteer": "23.4.1",
-    "puppeteer-core": "23.4.1",
+    "puppeteer": "23.11.1",
+    "puppeteer-core": "23.11.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "twitter-api-v2": "^1.17.2"

@@ -62,7 +62,6 @@ const sitesHourly = [
         typeFilter: ['PC 하드웨어', '모바일 / 가젯', '노트북', '가전', '게임 / SW'],
         iconURL: 'https://zod.kr/files/attach/xeicon/favicon.ico?t=1731517578',
         dataKey: 'zod_digital',
-        useAxios:true
     }
 ];
 
@@ -106,7 +105,6 @@ const sitesEvery20 = [
         typeFilter: ['PC 하드웨어', '모바일 / 가젯', '노트북', '가전', '게임 / SW'],
         iconURL: 'https://zod.kr/files/attach/xeicon/favicon.ico?t=1731517578',
         dataKey: 'zod_digital',
-        useAxios:true
     }
 ];
 
