@@ -8,13 +8,29 @@ import {data, loadData, saveData} from './data'
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 
+//웹 브라우저 사용을 위한 세팅
 puppeteer.use(StealthPlugin());
+
+//환경설정 파일 불러오기
 dotenv.config()
+
+//저장된 데이터 불러오기
 loadData()
+
+//디스코드 클라이언트 세팅
 const client = new Discord.WebhookClient({id: process.env.DISCORDBOT, token:process.env.DISCORDTOKEN})
 const client2 = new Discord.WebhookClient({id: process.env.DISCORDBOT2, token:process.env.DISCORDTOKEN2})
 const client3 = new Discord.WebhookClient({id: process.env.DISCORDBOT3, token:process.env.DISCORDTOKEN3})
 
+/*
+    name: 사이트 이름
+    url: 사이트 상점 주소,
+    selector: 상점 게시판에서 줄단위로 되어 있는 상위태그 ,
+    typeFilter: 불러올 타입들,
+    iconURL: favicon.ico',
+    dataKey: 저장 키 이름,
+    useAxios:true Axios사용유무 기본은 puppeteer 임
+ */
 const sitesHourly = [
     {
         name: '뽐뿌',
@@ -124,6 +140,7 @@ cron.schedule('0,20,40 * * * *', async () => {
     saveData();
 });
 
+// 사이트에서 게시판 내용 불러오기
 async function processSite(site, todayDate) {
     try {
         const html = site.useAxios ? await fetchHtmlAxios(site.url) : await fetchHtmlPuppeteer(site);
@@ -140,6 +157,7 @@ async function processSite(site, todayDate) {
     }
 }
 
+//게시판내용을 역순으로 뒤집기
 async function processList(list, site, $, todayDate) {
     if(list.length > 0 ) {
         list.reverse().forEach(elem => {
@@ -158,6 +176,7 @@ async function processList(list, site, $, todayDate) {
 
 }
 
+// 사이트 내용에서 각 요소 분리의 메소드의 분기처리
 function extractItemData($,element, site, todayDate) {
     switch (site.name) {
         case '뽐뿌':
@@ -182,6 +201,7 @@ function extractItemData($,element, site, todayDate) {
     }
 }
 
+//조드 요소 분리
 function extractZodData($,element, site, todayDate) {
     const content =  element.find('a.tw-flex-1');
     const thumbnail = element.find('div.app-thumbnail').find('img').attr('src')
@@ -319,6 +339,7 @@ function extractArcaData($,element, site, todayDate) {
     return { id, type, name, url:`https://arca.live${url}`, thumbnail, date };
 }
 
+// 디스코드 내용 보내기
 function sendEmbed(itemData, site) {
     const filterKeywords = ['저렴하게', '현금', '지원금', '즉시지원', '성지', '방법', '개통', '구독', '최대', '여기서', '싸게 사는법', '혜택 총정리', '잘 주는곳', '곳 알기', '받아보세요', '알아보자', '정수기 추천',
         '신규가입', '재약정', '당일', '결합', '가입', '렌탈', '상담', '설치', '요금제', '알려', '이거야', '싼곳', '여기', '하세요'];
@@ -364,10 +385,12 @@ function sendEmbed(itemData, site) {
     client3.send({ embeds: [embed] });
 }
 
+//필터링
 function shouldSend(itemData, site) {
     return site.typeFilter ? site.typeFilter.includes(itemData.type) && data[site.dataKey] < itemData.id : data[site.dataKey] < itemData.id;
 }
 
+//브라우저 사용해서 사이트 내용 불러오기
 async function fetchHtmlPuppeteer(site) {
     const browser = await puppeteer.launch({
         headless: true,
@@ -410,6 +433,7 @@ async function fetchHtmlPuppeteer(site) {
     }
 }
 
+//Axios 사용해서 사이트 내용 불러오기
 async function fetchHtmlAxios(url) {
     try {
         const response = await axios.get(url, { responseType: 'arraybuffer' });

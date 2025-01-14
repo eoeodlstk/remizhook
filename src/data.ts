@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 
+//데이터 키 초기화
 class Data {
     ppomppu_computer: number = 0
     foppomppu_computer: number = 0
