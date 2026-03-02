@@ -1,0 +1,46 @@
+stages:
+  - analyze
+  - test
+  - build
+  - deploy
+
+default:
+  tags:
+    - windows-runner
+
+detect_repo_type:
+  stage: analyze
+  script:
+    - chmod +x ci/detect_repo_type.sh
+    - ./ci/detect_repo_type.sh
+  artifacts:
+    reports:
+      dotenv: detect.env
+
+build_android_when_app:
+  stage: build
+  rules:
+    - if: '$repo_type == "flutter" || $repo_type == "android_app"'
+  script:
+    - echo "Android build base pipeline"
+
+build_backend_when_backend:
+  stage: build
+  rules:
+    - if: '$repo_type == "backend"'
+  script:
+    - echo "Backend build base pipeline"
+
+build_library_when_library:
+  stage: build
+  rules:
+    - if: '$repo_type == "library" || $repo_type == "android_lib"'
+  script:
+    - echo "Library build base pipeline"
+
+deploy_placeholder:
+  stage: deploy
+  when: manual
+  allow_failure: true
+  script:
+    - echo "Deploy is intentionally manual until app-specific secrets are configured."
