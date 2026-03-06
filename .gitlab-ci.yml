@@ -3,7 +3,7 @@ stages:
   - deploy
 
 variables:
-  NEXUS_REGISTRY: 192.168.50.20:15001
+  NEXUS_REGISTRY: docker.gmcg.kr
   NEXUS_REPO: docker-hosted
   IMAGE_NAME: remizhook
 
@@ -17,7 +17,7 @@ build:amd64:
     DOCKER_TLS_CERTDIR: ""
     PLATFORM: linux/amd64
   before_script:
-    - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD http://$NEXUS_REGISTRY
+    - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
     - docker build --platform linux/amd64 -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA .
     - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA
@@ -40,7 +40,7 @@ build:arm64:
     DOCKER_TLS_CERTDIR: ""
     PLATFORM: linux/arm64
   before_script:
-    - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD http://$NEXUS_REGISTRY
+    - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
     - docker build --platform linux/arm64 -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA .
     - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA
@@ -62,7 +62,7 @@ manifest:
   variables:
     DOCKER_TLS_CERTDIR: ""
   before_script:
-    - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD http://$NEXUS_REGISTRY
+    - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
     - docker manifest create $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
     - docker manifest push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest
