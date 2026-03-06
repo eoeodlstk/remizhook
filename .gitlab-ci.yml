@@ -3,7 +3,7 @@ stages:
   - deploy
 
 variables:
-  NEXUS_REGISTRY: 192.168.50.20:15001
+  NEXUS_REGISTRY: docker.gmcg.kr
   NEXUS_REPO: docker-hosted
   IMAGE_NAME: remizhook
 
@@ -58,15 +58,14 @@ manifest:
   stage: deploy
   image: docker:28
   services:
-    - name: docker:28-dind
-      command: ["--insecure-registry=192.168.50.20:15001"]
+    - docker:28-dind
   variables:
     DOCKER_TLS_CERTDIR: ""
   before_script:
     - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
-    - docker manifest create --insecure $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
-    - docker manifest push --insecure $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest
+    - docker manifest create $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
+    - docker manifest push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest
   needs:
     - build:amd64
     - build:arm64
