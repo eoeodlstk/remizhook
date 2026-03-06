@@ -19,7 +19,7 @@ build:amd64:
   before_script:
     - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
-    - docker build --platform linux/amd64 -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA .
+    - docker build --platform linux/amd64 --provenance=false --sbom=false -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA .
     - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA
     - docker tag $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest
     - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest
@@ -42,7 +42,7 @@ build:arm64:
   before_script:
     - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
-    - docker build --platform linux/arm64 -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA .
+    - docker build --platform linux/arm64 --provenance=false --sbom=false -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA .
     - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA
     - docker tag $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
     - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
