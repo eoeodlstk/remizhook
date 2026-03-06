@@ -64,7 +64,7 @@ manifest:
   before_script:
     - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
-    - docker manifest create $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
+    - docker manifest create $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA
     - docker manifest push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest
   needs:
     - build:amd64
