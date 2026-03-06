@@ -40,7 +40,7 @@ WORKDIR /app
 # 프로덕션 실행에 필요한 모듈만 설치 (DevDependencies 제외)
 COPY package.json package-lock.json* ./
 RUN npm config set strict-ssl false \
-  && npm ci --omit=dev --unsafe-perm
+  && npm ci --production --unsafe-perm
 
 # 빌드 스테이지에서 컴파일된 자바스크립트 파일만 가져오기
 COPY --from=builder /app/build ./build
