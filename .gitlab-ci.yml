@@ -3,7 +3,7 @@ stages:
   - deploy
 
 variables:
-  NEXUS_REGISTRY: 192.168.50.20:15001
+  NEXUS_REGISTRY: http://192.168.50.20:15001
   NEXUS_REPO: docker-hosted
   IMAGE_NAME: remizhook
 
