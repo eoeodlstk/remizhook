@@ -85,7 +85,7 @@ deploy:nas:
     - printf "%s" "$NAS_SSH_KEY_B64" | base64 -d > ~/.ssh/nas_key
     - chmod 600 ~/.ssh/nas_key
   script:
-    - ssh -i ~/.ssh/nas_key -o StrictHostKeyChecking=no -p 22023 $NAS_USER@$NAS_HOST "cd /volume1/docker/app && sudo /usr/local/bin/docker-compose pull remizhook && sudo /usr/local/bin/docker-compose up -d --force-recreate remizhook"
+    - ssh -i ~/.ssh/nas_key -o StrictHostKeyChecking=no -p 22023 $NAS_USER@$NAS_HOST "sudo /usr/local/bin/deploy-compose remizhook"
   needs:
     - manifest
   tags:
