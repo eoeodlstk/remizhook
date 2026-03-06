@@ -3,8 +3,8 @@ stages:
   - deploy
 
 variables:
-  NEXUS_REGISTRY: docker.gmcg.kr
-  NEXUS_REPO: docker
+  NEXUS_REGISTRY: 192.168.50.20:15001
+  NEXUS_REPO: docker-hosted
   IMAGE_NAME: remizhook
 
 # AMD64 이미지 빌드
