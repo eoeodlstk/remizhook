@@ -1,6 +1,7 @@
 import Discord, { EmbedBuilder } from 'discord.js';
 import dotenv from "dotenv";
 import * as cheerio from 'cheerio';
+import axios from 'axios';
 const cloudscraper = require('cloudscraper');
 import iconv from 'iconv-lite';
 import cron from 'node-cron';
@@ -65,7 +66,8 @@ const sitesHourly: SiteConfig[] = [
         selector: 'div[class^="list-table hybrid"] > div[class^="vrow hybrid"]',
         typeFilter: ['전자제품', 'PC/하드웨어', 'SW/게임', '임박', '기타'],
         iconURL: 'https://arca.live/static/favicon.ico',
-        dataKey: 'hotdeal_chanel'
+        dataKey: 'hotdeal_chanel',
+        useFlaresolverr: true
     },
     {
         name: '루리웹',
@@ -81,7 +83,8 @@ const sitesHourly: SiteConfig[] = [
         selector: 'ul[class^="app-board-template-list zod-board-list--deal"] > li:not(.notice):not(.zod-board-list--deal-ended)',
         typeFilter: ['PC 하드웨어', '모바일 / 가젯', '노트북', '가전', '게임 / SW'],
         iconURL: 'https://zod.kr/files/attach/xeicon/favicon.ico?t=1731517578',
-        dataKey: 'zod_digital'
+        dataKey: 'zod_digital',
+        useFlaresolverr: true
     }
 ];
 
@@ -162,16 +165,16 @@ async function runCrawling(sites: SiteConfig[], todayDate: string) {
     }
 }
 
-async function fetchHtmlCloudscraper(url: string, siteName: string) {
+// 일반 사이트용 HTML 페칭 (cloudscraper)
+async function fetchHtmlCloudscraper(url: string, siteName: string): Promise<string | null> {
     try {
         const responseData = await cloudscraper.get({
             uri: url,
-            encoding: null, // Critical to receive buffer/binary data for `iconv-lite` decoding
+            encoding: null,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                 'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-                'Accept-Encoding': 'gzip, deflate, br',
                 'Cache-Control': 'max-age=0'
             }
         });
@@ -182,18 +185,58 @@ async function fetchHtmlCloudscraper(url: string, siteName: string) {
     }
 }
 
+// Cloudflare 차단 사이트용 HTML 페칭 (FlareSolverr)
+const FLARESOLVERR_URL = process.env.FLARESOLVERR_URL || 'http://localhost:8191/v1';
+
+async function fetchHtmlFlaresolverr(url: string, siteName: string): Promise<string | null> {
+    try {
+        const response = await axios.post(FLARESOLVERR_URL, {
+            cmd: 'request.get',
+            url: url,
+            maxTimeout: 60000
+        }, {
+            timeout: 65000,
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.data?.solution?.response) {
+            console.log(`[FlareSolverr] ${siteName} HTML 수신 완료 (status: ${response.data.solution.status})`);
+            return response.data.solution.response;
+        } else {
+            console.error(`[FlareSolverr] ${siteName} 응답에 HTML이 없습니다.`);
+            return null;
+        }
+    } catch (error: any) {
+        console.error(`[FlareSolverr] ${siteName} (${url}) 요청 실패:`, error.message);
+        return null;
+    }
+}
+
 // 사이트에서 게시판 내용 불러오기
 async function processSite(site: SiteConfig, todayDate: string) {
     try {
-        const html = await fetchHtmlCloudscraper(site.url, site.name);
+        // Cloudflare 차단 사이트는 FlareSolverr, 나머지는 cloudscraper 사용
+        let html: string | null;
+        if (site.useFlaresolverr) {
+            html = await fetchHtmlFlaresolverr(site.url, site.name);
+        } else {
+            html = await fetchHtmlCloudscraper(site.url, site.name);
+        }
+
         if (!html) {
             console.error(`HTML content is undefined for ${site.name}`);
             return;
         }
 
-        // 사이트별 인코딩 설정에 따라 디코딩 (뽐뿌: EUC-KR, 나머지: UTF-8)
-        const encoding = site.encoding || 'UTF-8';
-        const decodedHtml = iconv.decode(Buffer.from(html), encoding).toString();
+        // FlareSolverr는 이미 문자열로 반환하므로 인코딩 분기
+        let decodedHtml: string;
+        if (site.useFlaresolverr) {
+            decodedHtml = typeof html === 'string' ? html : iconv.decode(Buffer.from(html), 'UTF-8').toString();
+        } else {
+            const encoding = site.encoding || 'UTF-8';
+            decodedHtml = iconv.decode(Buffer.from(html), encoding).toString();
+        }
+
         const $ = cheerio.load(decodedHtml);
         const list: any[] = [];
         $(site.selector).each((i: number, elem: any) => { list.push(elem) });

@@ -8,7 +8,8 @@ export interface SiteConfig {
     typeFilter?: string[];
     iconURL?: string;
     dataKey: string;
-    encoding?: string; // 사이트 인코딩 (기본값: UTF-8, 뽐뿌: EUC-KR)
+    encoding?: string;          // 사이트 인코딩 (기본값: UTF-8, 뽐뿌: EUC-KR)
+    useFlaresolverr?: boolean;  // Cloudflare 차단 사이트용 FlareSolverr 사용 여부
 }
 
 /**
