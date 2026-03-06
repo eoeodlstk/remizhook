@@ -4,6 +4,7 @@ stages:
 
 variables:
   NEXUS_REGISTRY: docker.gmcg.kr
+  NEXUS_REPO: docker
   IMAGE_NAME: remizhook
 
 # AMD64 이미지 빌드
@@ -18,8 +19,8 @@ build:amd64:
   before_script:
     - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
-    - docker build --platform linux/amd64 --provenance=false --sbom=false -t $NEXUS_REGISTRY/$IMAGE_NAME:amd64-latest .
-    - docker push $NEXUS_REGISTRY/$IMAGE_NAME:amd64-latest
+    - docker build --platform linux/amd64 --provenance=false --sbom=false -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest .
+    - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest
   tags:
     - docker
     - amd64
@@ -39,8 +40,8 @@ build:arm64:
   before_script:
     - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
-    - docker build --platform linux/arm64 --provenance=false --sbom=false -t $NEXUS_REGISTRY/$IMAGE_NAME:arm64-latest .
-    - docker push $NEXUS_REGISTRY/$IMAGE_NAME:arm64-latest
+    - docker build --platform linux/arm64 --provenance=false --sbom=false -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest .
+    - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
   tags:
     - docker
     - arm64
@@ -59,8 +60,8 @@ manifest:
   before_script:
     - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
-    - docker manifest create $NEXUS_REGISTRY/$IMAGE_NAME:latest $NEXUS_REGISTRY/$IMAGE_NAME:amd64-latest $NEXUS_REGISTRY/$IMAGE_NAME:arm64-latest
-    - docker manifest push $NEXUS_REGISTRY/$IMAGE_NAME:latest
+    - docker manifest create $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
+    - docker manifest push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest
   needs:
     - build:amd64
     - build:arm64
