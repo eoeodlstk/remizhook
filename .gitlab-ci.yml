@@ -10,9 +10,9 @@ variables:
 # AMD64 이미지 빌드
 build:amd64:
   stage: build
-  image: docker:24
+  image: docker:28
   services:
-    - docker:24-dind
+    - docker:28-dind
   variables:
     DOCKER_TLS_CERTDIR: ""
     PLATFORM: linux/amd64
@@ -33,9 +33,9 @@ build:amd64:
 # ARM64 이미지 빌드 (맥미니)
 build:arm64:
   stage: build
-  image: docker:24
+  image: docker:28
   services:
-    - docker:24-dind
+    - docker:28-dind
   variables:
     DOCKER_TLS_CERTDIR: ""
     PLATFORM: linux/arm64
@@ -56,9 +56,9 @@ build:arm64:
 # Multi-arch Manifest 생성
 manifest:
   stage: deploy
-  image: docker:24
+  image: docker:28
   services:
-    - docker:24-dind
+    - docker:28-dind
   variables:
     DOCKER_TLS_CERTDIR: ""
   before_script:
