@@ -1,7 +1,11 @@
 # ==========================================
 # 1. 빌드 스테이지 (Builder Stage)
 # ==========================================
-FROM node:22.9-slim AS builder
+# Multi-arch 지원
+FROM --platform=$TARGETPLATFORM node:22.9-slim AS builder
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 WORKDIR /app
 
@@ -21,7 +25,7 @@ RUN tsc --build
 # ==========================================
 # 2. 실행 스테이지 (Production Stage)
 # ==========================================
-FROM node:22.9-slim AS runner
+FROM --platform=$TARGETPLATFORM node:22.9-slim AS runner
 
 # 레이블 설정
 LABEL authors="jongchulno"
