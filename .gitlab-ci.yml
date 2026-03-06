@@ -1,46 +1,99 @@
 stages:
-  - analyze
-  - test
   - build
   - deploy
 
-default:
+variables:
+  NEXUS_REGISTRY: docker.gmcg.kr
+  NEXUS_REPO: docker
+  IMAGE_NAME: remizhook
+
+# AMD64 이미지 빌드
+build:amd64:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    PLATFORM: linux/amd64
+  before_script:
+    - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
+  script:
+    - docker build --platform linux/amd64 -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA .
+    - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA
+    - docker tag $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-$CI_COMMIT_SHORT_SHA $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest
+    - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest
   tags:
-    - windows-runner
+    - docker
+    - amd64
+  only:
+    - main
+    - master
 
-detect_repo_type:
-  stage: analyze
-  script:
-    - chmod +x ci/detect_repo_type.sh
-    - ./ci/detect_repo_type.sh
-  artifacts:
-    reports:
-      dotenv: detect.env
-
-build_android_when_app:
+# ARM64 이미지 빌드 (맥미니)
+build:arm64:
   stage: build
-  rules:
-    - if: '$repo_type == "flutter" || $repo_type == "android_app"'
+  image: docker:24
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    PLATFORM: linux/arm64
+  before_script:
+    - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
-    - echo "Android build base pipeline"
+    - docker build --platform linux/arm64 -t $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA .
+    - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA
+    - docker tag $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-$CI_COMMIT_SHORT_SHA $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
+    - docker push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
+  tags:
+    - docker
+    - arm64
+  only:
+    - main
+    - master
 
-build_backend_when_backend:
-  stage: build
-  rules:
-    - if: '$repo_type == "backend"'
-  script:
-    - echo "Backend build base pipeline"
-
-build_library_when_library:
-  stage: build
-  rules:
-    - if: '$repo_type == "library" || $repo_type == "android_lib"'
-  script:
-    - echo "Library build base pipeline"
-
-deploy_placeholder:
+# Multi-arch Manifest 생성
+manifest:
   stage: deploy
-  when: manual
-  allow_failure: true
+  image: docker:24
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - docker login -u $NEXUS_USER -p $NEXUS_PASSWORD $NEXUS_REGISTRY
   script:
-    - echo "Deploy is intentionally manual until app-specific secrets are configured."
+    - docker manifest create $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest \
+        $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:amd64-latest \
+        $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:arm64-latest
+    - docker manifest push $NEXUS_REGISTRY/$NEXUS_REPO/$IMAGE_NAME:latest
+  needs:
+    - build:amd64
+    - build:arm64
+  tags:
+    - docker
+    - amd64
+  only:
+    - main
+    - master
+
+# NAS 배포
+deploy:nas:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client docker-cli
+    - eval $(ssh-agent -s)
+    - echo "$NAS_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+  script:
+    - ssh -o StrictHostKeyChecking=no -p 22023 $NAS_USER@$NAS_HOST "cd /volume1/docker/app && docker-compose pull remizhook && docker-compose up -d --force-recreate remizhook"
+  needs:
+    - manifest
+  tags:
+    - docker
+    - amd64
+  only:
+    - main
+    - master
