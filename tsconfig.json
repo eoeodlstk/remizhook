@@ -3,7 +3,6 @@
     "target": "ES2020",
     "module": "commonjs",
     "moduleResolution": "node",
-    "typeRoots": ["./node_modules/@types", "./@types"],
     "outDir": "build",
     "rootDir": "src",
     "noImplicitAny": false,
@@ -14,6 +13,11 @@
     "emitDecoratorMetadata": true,
     "allowJs": true
   },
-  "include": ["./src"],
-  "exclude": ["./node_modules/*", "./build/*"]
+  "include": [
+    "./src"
+  ],
+  "exclude": [
+    "./node_modules/*",
+    "./build/*"
+  ]
 }

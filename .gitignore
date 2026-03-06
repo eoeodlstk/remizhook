@@ -3,4 +3,6 @@
 /build/
 .idea/
 /node_modules/
+/data/
+*.db
 package-lock.json
